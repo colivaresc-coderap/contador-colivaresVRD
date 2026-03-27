@@ -3,259 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>COLIVARESVRD | GTA Counter Mobile</title>
+    <title>COLIVARESVRD | LIVE SESSION</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        /* ESTILOS BASE (Se aplican a todos los dispositivos) */
-        body { 
-            font-family: 'Arial Black', 'Helvetica Bold', sans-serif; 
-            text-align: center; 
-            background: #0d0d0d; 
-            color: white; 
-            margin: 0; 
-            padding: 10px; /* Un poco de aire en los bordes */
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            text-transform: uppercase; 
-            box-sizing: border-box;
-        }
-
-        .container { 
-            background: rgba(20, 20, 20, 0.98); 
-            padding: 20px; 
-            border-radius: 5px; 
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2); 
-            width: 100%; /* Ocupa todo el ancho disponible */
-            max-width: 450px; /* Pero no se hace gigante en PC */
-            border: 1px solid #333; 
-            box-sizing: border-box;
-        }
-
-        .gta-title-link {
-            text-decoration: none; 
-            color: #00d4ff; 
-            font-size: 1.8rem; /* Tamaño base */
-            font-weight: 900; 
-            text-shadow: 2px 2px 0px #ff00d4; 
-            display: inline-block;
-            margin-bottom: 15px;
-            word-wrap: break-word; /* Evita que el nombre largo rompa el diseño */
-        }
-
-        .label-tiempo {
-            font-size: 0.7rem; 
-            color: #666; 
-            letter-spacing: 1px; 
-            margin-bottom: -5px;
-        }
-
-        .main-timer { 
-            font-size: 3rem; /* Tamaño base */
-            font-weight: bold; 
-            margin: 5px 0 20px 0; 
-            color: #ff00d4; 
-            font-family: 'Courier New', monospace; 
-            text-shadow: 0 0 10px rgba(255, 0, 212, 0.5); 
-            border-bottom: 2px solid #ff00d4;
-            display: inline-block;
-            padding-bottom: 5px;
-        }
-
-        .stats { 
-            display: flex; 
-            gap: 10px; 
-            margin-bottom: 20px; 
-        }
-
-        .box { 
-            flex: 1; 
-            padding: 15px; 
-            border-radius: 3px; 
-            color: white; 
-            border: 1px solid #333;
-        }
-        .bueno { background: rgba(46, 125, 50, 0.6); }
-        .malo { background: rgba(198, 40, 40, 0.6); }
-        
-        .box span { font-size: 0.8rem; display: block; margin-bottom: 5px; color: #aaa; }
-        .box .count { font-size: 2.5rem; color: #fff; text-shadow: 2px 2px 0px #000; font-weight: 900; }
-
-        .buttons-container {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .btn { 
-            padding: 15px; 
-            font-size: 1rem; 
-            cursor: pointer; 
-            border: none; 
-            color: white; 
-            font-weight: bold; 
-            flex: 1; 
-            text-transform: uppercase; 
-            border: 2px solid;
-            box-shadow: 0 4px 0px rgba(0,0,0,0.5);
-            transition: all 0.1s ease;
-        }
-
-        #btn-g { background: #4caf50; border-color: #2e7d32; }
-        #btn-b { background: #f44336; border-color: #c62828; }
-        #btn-z { background: #607d8b; border-color: #455a64; max-width: 80px; }
-
-        .btn:active { transform: translateY(2px); box-shadow: 0 2px 0px rgba(0,0,0,0.5); }
-
-        .log-container { 
-            margin-top: 25px; 
-            text-align: left; 
-            max-height: 150px; 
-            overflow-y: auto; 
-            background: rgba(0,0,0,0.8); 
-            padding: 10px; 
-            font-size: 0.8rem; 
-            border: 1px solid #222;
-            color: #888;
-        }
-        .log-item { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid #222; }
-        .log-type.bueno { color: #4caf50; }
-        .log-type.malo { color: #f44336; }
-
-        /* ========================================= */
-        /* MEDIA QUERIES (Ajustes específicos para MÓVIL) */
-        /* ========================================= */
-        
-        @media (max-width: 480px) {
-            .container {
-                padding: 15px; /* Menos padding interno */
-            }
-
-            .gta-title-link {
-                font-size: 1.5rem; /* Título más pequeño */
-            }
-
-            .main-timer {
-                font-size: 2.5rem; /* Reloj más pequeño */
-                width: 100%; /* Que ocupe todo el ancho para centrarse bien */
-            }
-
-            .box {
-                padding: 10px; /* Cuadros de texto más pequeños */
-            }
-            .box span { font-size: 0.7rem; }
-            .box .count { font-size: 2rem; }
-
-            /* TRUCO MAESTRO: Los botones se ponen en columna (uno abajo del otro) */
-            .buttons-container {
-                flex-direction: column; 
-                gap: 8px;
-            }
-
-            .btn {
-                width: 100%; /* Botones a lo ancho */
-                max-width: 100% !important; /* Quitar el límite del botón Undo */
-                padding: 12px;
-                font-size: 0.9rem;
-            }
-        }
+        body { font-family: 'Arial Black', sans-serif; text-align: center; background: #0d0d0d; color: white; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-transform: uppercase; box-sizing: border-box; }
+        .container { background: rgba(20, 20, 20, 0.98); padding: 20px; border-radius: 5px; box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); width: 100%; max-width: 450px; border: 1px solid #333; }
+        .gta-title-link { text-decoration: none; color: #00d4ff; font-size: 1.8rem; font-weight: 900; text-shadow: 2px 2px 0px #ff00d4; display: inline-block; margin-bottom: 10px; transition: 0.3s; }
+        .gta-title-link:hover { color: #ff00d4; text-shadow: 2px 2px 0px #00d4ff; }
+        .session-badge { font-size: 0.6rem; color: #555; margin-bottom: 10px; display: block; }
+        .main-timer { font-size: 3.5rem; font-weight: bold; margin: 5px 0 20px 0; color: #ff00d4; font-family: 'Courier New', monospace; text-shadow: 0 0 10px rgba(255, 0, 212, 0.5); border-bottom: 2px solid #ff00d4; display: inline-block; }
+        .stats { display: flex; gap: 10px; margin-bottom: 20px; }
+        .box { flex: 1; padding: 15px; border: 1px solid #333; background: rgba(255,255,255,0.05); }
+        .bueno-box { border-left: 5px solid #4caf50; }
+        .malo-box { border-left: 5px solid #f44336; }
+        .box span { font-size: 0.7rem; color: #888; display: block; }
+        .count { font-size: 2.5rem; font-weight: 900; }
+        .buttons-container { display: flex; flex-direction: column; gap: 10px; }
+        .btn-row { display: flex; gap: 10px; }
+        .btn { padding: 18px; font-size: 1rem; cursor: pointer; border: none; color: white; font-weight: bold; flex: 1; text-transform: uppercase; border: 2px solid transparent; transition: 0.1s; }
+        #btn-g { background: #2e7d32; border-color: #4caf50; box-shadow: 0 4px #1b5e20; }
+        #btn-b { background: #c62828; border-color: #f44336; box-shadow: 0 4px #8e1c1c; }
+        #btn-z { background: #455a64; border-color: #607d8b; box-shadow: 0 4px #263238; max-width: 100px; }
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+        .log-container { margin-top: 20px; text-align: left; max-height: 120px; overflow-y: auto; background: #000; padding: 10px; font-size: 0.7rem; border: 1px solid #222; font-family: monospace; }
+        .log-item { display: flex; justify-content: space-between; border-bottom: 1px solid #111; padding: 4px 0; }
+        @media (max-width: 480px) { .main-timer { font-size: 2.8rem; } .gta-title-link { font-size: 1.5rem; } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    
-    <a href="https://discord.gg/CCT4c52RRz" target="_blank" class="gta-title-link">
-        ColivaresVRD
-    </a>
+    <a href="https://discord.gg/CCT4c52RRz" target="_blank" class="gta-title-link">ColivaresVRD</a>
+    <span class="session-badge" id="session-name">SALA: GENERAL</span>
 
-    <div class="label-tiempo">TIEMPO DE SESIÓN</div>
     <div class="main-timer" id="display">00:00:00</div>
 
     <div class="stats">
-        <div class="box bueno">
-            <span>Buenos</span>
-            <span class="count" id="c-bueno">0</span>
-        </div>
-        <div class="box malo">
-            <span>Malos</span>
-            <span class="count" id="c-malo">0</span>
-        </div>
+        <div class="box bueno-box"><span>BUENOS</span><div class="count" id="c-bueno" style="color:#4caf50">0</div></div>
+        <div class="box malo-box"><span>MALOS</span><div class="count" id="c-malo" style="color:#f44336">0</div></div>
     </div>
 
     <div class="buttons-container">
-        <button class="btn" id="btn-g">Bueno (G)</button>
-        <button class="btn" id="btn-b">Malo (B)</button>
-        <button class="btn" id="btn-z">Undo (Z)</button>
+        <div class="btn-row">
+            <button class="btn" id="btn-g">Bueno (G)</button>
+            <button class="btn" id="btn-b">Malo (B)</button>
+        </div>
+        <button class="btn" style="align-self:center" id="btn-z">Undo (Z)</button>
     </div>
 
-    <div class="log-container">
-        <div id="log"></div>
-    </div>
+    <div class="log-container" id="log"></div>
 </div>
 
 <script>
-    /* La lógica de JavaScript se mantiene igual, no necesita cambios */
-    let startTime, timerInterval, history = [];
-    const display = document.getElementById('display');
-    const log = document.getElementById('log');
+    // TU CONFIGURACIÓN DE FIREBASE
+    const firebaseConfig = {
+      apiKey: "AIzaSyCcRPE7BCaQVOepkfMFRRDOgTnigcO4218",
+      authDomain: "contador-colivares.firebaseapp.com",
+      projectId: "contador-colivares",
+      databaseURL: "https://contador-colivares-default-rtdb.firebaseio.com", // Verifica esta URL en tu consola
+      storageBucket: "contador-colivares.firebasestorage.app",
+      appId: "1:774526373630:web:a0f15a1c6727a50b2c1faf"
+    };
 
-    function timeString(ms) {
-        let s = Math.floor(ms / 1000);
-        let m = Math.floor(s / 60);
-        let h = Math.floor(m / 60);
-        return [h, m % 60, s % 60].map(v => v.toString().padStart(2, '0')).join(':');
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Obtener ID de sesión de la URL o usar "general"
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('sesion') || 'general';
+    document.getElementById('session-name').innerText = `SALA: ${sessionId.toUpperCase()}`;
+    const sessionRef = db.ref('sesiones/' + sessionId);
+
+    let startTime = null;
+    let timerInterval = null;
+
+    // Escuchar cambios en tiempo real desde Firebase
+    sessionRef.on('value', (snapshot) => {
+        const data = snapshot.val() || { buenos: 0, malos: 0, history: [], startAt: null };
+        
+        document.getElementById('c-bueno').innerText = data.buenos;
+        document.getElementById('c-malo').innerText = data.malos;
+        
+        // Actualizar Historial
+        const logHtml = (data.history || []).slice().reverse().map(h => 
+            `<div class="log-item"><span style="color:${h.type=='Bueno'?'#4caf50':'#f44336'}">${h.type}</span> <span>${h.time}</span></div>`
+        ).join('');
+        document.getElementById('log').innerHTML = logHtml;
+
+        // Sincronizar Reloj
+        if (data.startAt && !timerInterval) {
+            startTime = data.startAt;
+            startTimer();
+        } else if (!data.startAt) {
+            stopTimer();
+        }
+    });
+
+    function startTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            const ms = Date.now() - startTime;
+            const s = Math.floor(ms/1000);
+            document.getElementById('display').innerText = 
+                [Math.floor(s/3600), Math.floor((s%3600)/60), s%60].map(v=>v.toString().padStart(2,'0')).join(':');
+        }, 1000);
     }
 
-    function updateStats() {
-        const b = history.filter(x => x.type === 'Bueno').length;
-        const m = history.filter(x => x.type === 'Malo').length;
-        document.getElementById('c-bueno').innerText = b;
-        document.getElementById('c-malo').innerText = m;
-        
-        log.innerHTML = history.slice().reverse().map(i => `
-            <div class="log-item">
-                <span class="log-type ${i.type.toLowerCase()}">${i.type.toUpperCase()}</span> 
-                <span class="log-time">${i.time}</span>
-            </div>
-        `).join('');
+    function stopTimer() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        document.getElementById('display').innerText = "00:00:00";
     }
 
     function addRecord(type) {
-        const now = new Date();
-        if (!startTime) {
-            startTime = now;
-            timerInterval = setInterval(() => {
-                display.innerText = timeString(new Date() - startTime);
-            }, 1000);
-        }
-        let diff = history.length > 0 ? ((now - history[history.length-1].raw) / 1000).toFixed(2) + "s" : "Inicio";
-        history.push({ type, raw: now, time: now.toLocaleTimeString(), diff });
-        updateStats();
+        sessionRef.once('value', (snapshot) => {
+            const data = snapshot.val() || { buenos: 0, malos: 0, history: [], startAt: null };
+            
+            if (!data.startAt) data.startAt = Date.now();
+            
+            if (type === 'Bueno') data.buenos++;
+            else data.malos++;
+
+            const newEntry = { type, time: new Date().toLocaleTimeString() };
+            if (!data.history) data.history = [];
+            data.history.push(newEntry);
+
+            sessionRef.set(data);
+        });
     }
 
     function undo() {
-        if (history.length > 0) {
-            history.pop();
-            if (history.length === 0) {
-                clearInterval(timerInterval);
-                startTime = null;
-                display.innerText = "00:00:00";
-            }
-            updateStats();
-        }
+        sessionRef.once('value', (snapshot) => {
+            const data = snapshot.val();
+            if (!data || !data.history || data.history.length === 0) return;
+
+            const last = data.history.pop();
+            if (last.type === 'Bueno') data.buenos--;
+            else data.malos--;
+
+            if (data.history.length === 0) data.startAt = null;
+            
+            sessionRef.set(data);
+        });
     }
 
+    // Botones y Teclas
     document.getElementById('btn-g').onclick = () => addRecord('Bueno');
     document.getElementById('btn-b').onclick = () => addRecord('Malo');
     document.getElementById('btn-z').onclick = undo;
-
     document.addEventListener('keydown', (e) => {
-        if (e.key.toLowerCase() === 'g') addRecord('Bueno');
-        if (e.key.toLowerCase() === 'b') addRecord('Malo');
-        if (e.key.toLowerCase() === 'z') undo();
+        if(e.key.toLowerCase()==='g') addRecord('Bueno');
+        if(e.key.toLowerCase()==='b') addRecord('Malo');
+        if(e.key.toLowerCase()==='z') undo();
     });
 </script>
-
 </body>
 </html>
