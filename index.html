@@ -79,21 +79,21 @@
 
     let timerInterval = null;
 
-    // --- FUNCIÓN PARA DISCORD CON TU WEBHOOK ---
-  // --- FUNCIÓN PARA DISCORD CON TU WEBHOOK ---
+  // --- FUNCIÓN PARA DISCORD CON MENCIÓN @EVERYONE ---
     function enviarADiscord(sesion, inicial, tiempo) {
         const WEBHOOK_URL = "https://discord.com/api/webhooks/1487229496166842508/E7ao4Z0VempUpkaAnKdYawDi16sRQKctk0N7N40owyFUp8bGayeXFYf81yuKoP83_KHM"; 
         
-        const embed = {
-            username: "ColivaresVRD", // <--- Nombre del Bot actualizado
-            avatar_url: "https://i.imgur.com/vHq7FhY.png", // Puedes cambiar este link por el logo de tu server
+        const payload = {
+            username: "ColivaresVRD",
+            avatar_url: "https://i.imgur.com/vHq7FhY.png",
+            content: "@everyone 🚨 **¡MISIÓN FINALIZADA!** 🚨", // <--- Esto activa la notificación a todos
             embeds: [{
-                title: "✅ MISIÓN CUMPLIDA - REPORTE DE SESIÓN",
+                title: "✅ REPORTE DE SESIÓN COMPLETADO",
                 color: 3066993, 
                 fields: [
-                    { name: "📍 Sesión", value: sesion.toUpperCase(), inline: true },
-                    { name: "📦 Cantidad Inicial", value: inicial.toString(), inline: true },
-                    { name: "⏱️ Tiempo Total", value: tiempo, inline: true }
+                    { name: "📍 Sesión", value: `\`${sesion.toUpperCase()}\``, inline: true },
+                    { name: "📦 Cantidad Inicial", value: `\`${inicial}\``, inline: true },
+                    { name: "⏱️ Tiempo Total", value: `\`${tiempo}\``, inline: true }
                 ],
                 footer: { text: "ColivaresVRD System | " + new Date().toLocaleString() }
             }]
@@ -102,7 +102,7 @@
         fetch(WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(embed)
+            body: JSON.stringify(payload)
         });
     }
 
