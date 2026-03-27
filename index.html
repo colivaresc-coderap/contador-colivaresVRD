@@ -2,169 +2,163 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COLIVARESVRD | Contador Estilo GTA V</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>COLIVARESVRD | GTA Counter Mobile</title>
     <style>
-        /* Estilos generales con fondo oscuro y neón */
+        /* ESTILOS BASE (Se aplican a todos los dispositivos) */
         body { 
-            font-family: 'Arial Black', 'Helvetica Bold', sans-serif; /* Usamos fuentes gruesas */
+            font-family: 'Arial Black', 'Helvetica Bold', sans-serif; 
             text-align: center; 
-            background: #0d0d0d; /* Fondo casi negro */
+            background: #0d0d0d; 
             color: white; 
-            padding: 20px; 
             margin: 0; 
+            padding: 10px; /* Un poco de aire en los bordes */
             display: flex; 
             justify-content: center; 
             align-items: center; 
             min-height: 100vh; 
-            text-transform: uppercase; /* Todo en mayúsculas */
+            text-transform: uppercase; 
+            box-sizing: border-box;
         }
 
-        /* Contenedor principal con efecto de neón sutil */
         .container { 
-            background: rgba(13, 13, 13, 0.95); /* Fondo negro translúcido */
-            padding: 40px; 
-            border-radius: 5px; /* Bordes menos redondeados, más "duros" */
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3), 0 0 30px rgba(255, 0, 212, 0.3); /* Sombra de neón azul y rosa */
-            min-width: 450px; 
-            border: 2px solid #333; 
+            background: rgba(20, 20, 20, 0.98); 
+            padding: 20px; 
+            border-radius: 5px; 
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2); 
+            width: 100%; /* Ocupa todo el ancho disponible */
+            max-width: 450px; /* Pero no se hace gigante en PC */
+            border: 1px solid #333; 
+            box-sizing: border-box;
         }
 
-        /* Estilo para el nombre COLIVARESVRD con hipervínculo y efecto GTA */
         .gta-title-link {
-            text-decoration: none; /* Quitar subrayado del link */
-            color: #00d4ff; /* Color neón cian inicial */
-            font-size: 2.5rem; 
+            text-decoration: none; 
+            color: #00d4ff; 
+            font-size: 1.8rem; /* Tamaño base */
             font-weight: 900; 
-            letter-spacing: -1px; /* Letras más juntas */
-            text-shadow: 2px 2px 0px #ff00d4, 4px 4px 0px #000; /* Sombra doble neón rosa y negra */
-            transition: all 0.3s ease; /* Transición suave */
+            text-shadow: 2px 2px 0px #ff00d4; 
             display: inline-block;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
+            word-wrap: break-word; /* Evita que el nombre largo rompa el diseño */
         }
 
-        /* Efecto al pasar el ratón sobre el link */
-        .gta-title-link:hover {
-            color: #ff00d4; /* Cambiar a rosa neón */
-            text-shadow: 2px 2px 0px #00d4ff, 4px 4px 10px #ff00d4; /* Sombra invertida y brillante */
-            transform: scale(1.05); /* Ligeramente más grande */
-            filter: blur(0.5px); /* Un desenfoque sutil tipo GTA */
+        .label-tiempo {
+            font-size: 0.7rem; 
+            color: #666; 
+            letter-spacing: 1px; 
+            margin-bottom: -5px;
         }
 
-        /* Cronómetro principal con fuente mono y neón */
         .main-timer { 
-            font-size: 4.5rem; 
+            font-size: 3rem; /* Tamaño base */
             font-weight: bold; 
-            margin: 10px 0 30px 0; 
-            color: #ff00d4; /* Rosa neón */
-            font-family: 'Courier New', Courier, monospace; 
-            text-shadow: 0 0 15px rgba(255, 0, 212, 0.6); 
-            border-bottom: 3px solid #ff00d4;
+            margin: 5px 0 20px 0; 
+            color: #ff00d4; 
+            font-family: 'Courier New', monospace; 
+            text-shadow: 0 0 10px rgba(255, 0, 212, 0.5); 
+            border-bottom: 2px solid #ff00d4;
             display: inline-block;
-            padding-bottom: 10px;
+            padding-bottom: 5px;
         }
 
-        /* Contenedor de estadísticas */
         .stats { 
             display: flex; 
-            gap: 20px; 
-            margin-bottom: 25px; 
+            gap: 10px; 
+            margin-bottom: 20px; 
         }
 
-        /* Cuadros de estadísticas con colores GTA */
         .box { 
             flex: 1; 
-            padding: 20px; 
-            border-radius: 0; /* Bordes cuadrados */
+            padding: 15px; 
+            border-radius: 3px; 
             color: white; 
-            border: 2px solid #333;
+            border: 1px solid #333;
         }
-        .bueno { 
-            background: rgba(46, 125, 50, 0.8); /* Verde oscuro translúcido */
-            border-color: #2e7d32;
-        }
-        .malo { 
-            background: rgba(198, 40, 40, 0.8); /* Rojo oscuro translúcido */
-            border-color: #c62828;
-        }
-        .box .count { 
-            font-size: 3rem; 
-            display: block; 
-            font-weight: 900; 
-            color: #fff;
-            text-shadow: 2px 2px 0px #000;
-        }
+        .bueno { background: rgba(46, 125, 50, 0.6); }
+        .malo { background: rgba(198, 40, 40, 0.6); }
+        
+        .box span { font-size: 0.8rem; display: block; margin-bottom: 5px; color: #aaa; }
+        .box .count { font-size: 2.5rem; color: #fff; text-shadow: 2px 2px 0px #000; font-weight: 900; }
 
-        /* Botones de acción estilo GTA (más cuadrados y con relieve) */
         .buttons-container {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             justify-content: center;
         }
+
         .btn { 
-            padding: 18px; 
-            font-size: 1.1rem; 
+            padding: 15px; 
+            font-size: 1rem; 
             cursor: pointer; 
             border: none; 
-            border-radius: 0; /* Bordes cuadrados */
             color: white; 
             font-weight: bold; 
             flex: 1; 
-            transition: all 0.1s ease; 
             text-transform: uppercase; 
             border: 2px solid;
-            font-family: 'Arial Black', sans-serif;
+            box-shadow: 0 4px 0px rgba(0,0,0,0.5);
+            transition: all 0.1s ease;
         }
 
-        #btn-g { 
-            background: #4caf50; 
-            border-color: #2e7d32;
-            box-shadow: 0 5px 0px #1b5e20; /* Efecto de relieve */
-        }
-        #btn-b { 
-            background: #f44336; 
-            border-color: #c62828;
-            box-shadow: 0 5px 0px #8e1c1c; 
-        }
-        #btn-z { 
-            background: #607d8b; 
-            border-color: #455a64;
-            box-shadow: 0 5px 0px #2a3a41; 
-            max-width: 90px;
-        }
+        #btn-g { background: #4caf50; border-color: #2e7d32; }
+        #btn-b { background: #f44336; border-color: #c62828; }
+        #btn-z { background: #607d8b; border-color: #455a64; max-width: 80px; }
 
-        /* Efecto al presionar los botones */
-        .btn:active { 
-            transform: translateY(3px); /* Se hunden al pulsar */
-            box-shadow: 0 2px 0px #1b5e20; /* Menor relieve al pulsar (ejemplo verde) */
-        }
-        #btn-b:active { box-shadow: 0 2px 0px #8e1c1c; }
-        #btn-z:active { box-shadow: 0 2px 0px #2a3a41; }
+        .btn:active { transform: translateY(2px); box-shadow: 0 2px 0px rgba(0,0,0,0.5); }
 
-        /* Historial de registros */
         .log-container { 
-            margin-top: 30px; 
+            margin-top: 25px; 
             text-align: left; 
-            max-height: 200px; 
+            max-height: 150px; 
             overflow-y: auto; 
-            background: rgba(17, 17, 17, 0.9); 
-            border-radius: 0; 
-            padding: 15px; 
-            font-size: 0.9rem; 
-            border: 1px solid #333;
+            background: rgba(0,0,0,0.8); 
+            padding: 10px; 
+            font-size: 0.8rem; 
+            border: 1px solid #222;
             color: #888;
         }
-        .log-item { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 8px 5px; 
-            border-bottom: 1px solid #222; 
+        .log-item { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid #222; }
+        .log-type.bueno { color: #4caf50; }
+        .log-type.malo { color: #f44336; }
+
+        /* ========================================= */
+        /* MEDIA QUERIES (Ajustes específicos para MÓVIL) */
+        /* ========================================= */
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px; /* Menos padding interno */
+            }
+
+            .gta-title-link {
+                font-size: 1.5rem; /* Título más pequeño */
+            }
+
+            .main-timer {
+                font-size: 2.5rem; /* Reloj más pequeño */
+                width: 100%; /* Que ocupe todo el ancho para centrarse bien */
+            }
+
+            .box {
+                padding: 10px; /* Cuadros de texto más pequeños */
+            }
+            .box span { font-size: 0.7rem; }
+            .box .count { font-size: 2rem; }
+
+            /* TRUCO MAESTRO: Los botones se ponen en columna (uno abajo del otro) */
+            .buttons-container {
+                flex-direction: column; 
+                gap: 8px;
+            }
+
+            .btn {
+                width: 100%; /* Botones a lo ancho */
+                max-width: 100% !important; /* Quitar el límite del botón Undo */
+                padding: 12px;
+                font-size: 0.9rem;
+            }
         }
-        .log-item:last-child { border-bottom: none; }
-        .log-type.bueno { color: #4caf50; font-weight: bold; }
-        .log-type.malo { color: #f44336; font-weight: bold; }
-        .log-diff { background: #222; padding: 2px 8px; border-radius: 0; font-weight: bold; color: #fff; font-family: monospace; }
-        .log-time { color: #555; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -175,7 +169,7 @@
         ColivaresVRD
     </a>
 
-    <div style="font-size: 0.8rem; color: #666; letter-spacing: 1px; margin-bottom: -5px;">TIEMPO DE SESIÓN</div>
+    <div class="label-tiempo">TIEMPO DE SESIÓN</div>
     <div class="main-timer" id="display">00:00:00</div>
 
     <div class="stats">
@@ -201,13 +195,11 @@
 </div>
 
 <script>
-    // Lógica del contador (sin cambios, solo adaptada para este diseño)
+    /* La lógica de JavaScript se mantiene igual, no necesita cambios */
     let startTime, timerInterval, history = [];
-
     const display = document.getElementById('display');
     const log = document.getElementById('log');
 
-    // Función para formatear el tiempo
     function timeString(ms) {
         let s = Math.floor(ms / 1000);
         let m = Math.floor(s / 60);
@@ -215,58 +207,36 @@
         return [h, m % 60, s % 60].map(v => v.toString().padStart(2, '0')).join(':');
     }
 
-    // Actualiza los marcadores y el historial visualmente
     function updateStats() {
         const b = history.filter(x => x.type === 'Bueno').length;
         const m = history.filter(x => x.type === 'Malo').length;
         document.getElementById('c-bueno').innerText = b;
         document.getElementById('c-malo').innerText = m;
         
-        // Dibuja el historial (los más nuevos primero)
         log.innerHTML = history.slice().reverse().map(i => `
             <div class="log-item">
                 <span class="log-type ${i.type.toLowerCase()}">${i.type.toUpperCase()}</span> 
-                <span class="log-diff">${i.diff}</span>
                 <span class="log-time">${i.time}</span>
             </div>
         `).join('');
     }
 
-    // Registra un nuevo clic
     function addRecord(type) {
         const now = new Date();
-        
-        // Iniciar el cronómetro si es el primer registro
         if (!startTime) {
             startTime = now;
             timerInterval = setInterval(() => {
                 display.innerText = timeString(new Date() - startTime);
             }, 1000);
         }
-
-        // Calcular la diferencia de tiempo con el registro anterior
-        let diff = "Inicio";
-        if (history.length > 0) {
-            const lastRecord = history[history.length-1];
-            diff = ((now - lastRecord.raw) / 1000).toFixed(2) + "s";
-        }
-
-        // Guardar el registro en el historial
-        history.push({ 
-            type, 
-            raw: now, 
-            time: now.toLocaleTimeString(), 
-            diff: diff 
-        });
-        
+        let diff = history.length > 0 ? ((now - history[history.length-1].raw) / 1000).toFixed(2) + "s" : "Inicio";
+        history.push({ type, raw: now, time: now.toLocaleTimeString(), diff });
         updateStats();
     }
 
-    // Borra el último registro
     function undo() {
         if (history.length > 0) {
             history.pop();
-            // Si el historial queda vacío, resetear el reloj
             if (history.length === 0) {
                 clearInterval(timerInterval);
                 startTime = null;
@@ -276,12 +246,10 @@
         }
     }
 
-    // Asignar eventos a los botones
     document.getElementById('btn-g').onclick = () => addRecord('Bueno');
     document.getElementById('btn-b').onclick = () => addRecord('Malo');
     document.getElementById('btn-z').onclick = undo;
 
-    // Asignar atajos de teclado
     document.addEventListener('keydown', (e) => {
         if (e.key.toLowerCase() === 'g') addRecord('Bueno');
         if (e.key.toLowerCase() === 'b') addRecord('Malo');
