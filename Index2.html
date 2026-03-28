@@ -9,7 +9,11 @@
     <style>
         body { font-family: 'Arial Black', sans-serif; text-align: center; background: #0d0d0d; color: white; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-transform: uppercase; box-sizing: border-box; }
         .container { background: rgba(20, 20, 20, 0.98); padding: 20px; border-radius: 5px; box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); width: 100%; max-width: 450px; border: 1px solid #333; }
-        .gta-title { color: #00d4ff; font-size: 1.8rem; font-weight: 900; text-shadow: 2px 2px 0px #ff00d4; margin-bottom: 5px; display: block; }
+        
+        /* Título con Hipervínculo Estilo GTA */
+        .gta-title-link { text-decoration: none; color: #00d4ff; font-size: 1.8rem; font-weight: 900; text-shadow: 2px 2px 0px #ff00d4; display: block; margin-bottom: 5px; transition: 0.3s; }
+        .gta-title-link:hover { color: #ff00d4; text-shadow: 2px 2px 0px #00d4ff; }
+        
         .session-info { font-size: 0.7rem; color: #555; letter-spacing: 2px; margin-bottom: 10px; display: block; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
         .finished { animation: blink 0.8s infinite; color: #4caf50 !important; border-color: #4caf50 !important; }
@@ -37,7 +41,7 @@
 <body>
 
 <div class="container">
-    <span class="gta-title">COLIVARESVRD</span>
+    <a href="https://discord.gg/CCT4c52RRz" target="_blank" class="gta-title-link">COLIVARESVRD</a>
     <span class="session-info" id="session-display">SESSION: GENERAL</span>
     
     <div class="setup-section" id="setup">
