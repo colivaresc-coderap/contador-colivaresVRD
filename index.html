@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>COLIVARESVRD | TELEMETRÍA</title>
+    <title>COLIVARESVRD | PERFORMANCE MONITOR (EN)</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
@@ -28,7 +28,7 @@
         .log-container { margin-top: 20px; text-align: left; max-height: 180px; overflow-y: auto; background: #000; padding: 10px; border: 1px solid #222; font-family: monospace; font-size: 0.7rem; }
         .log-entry { padding: 6px 0; border-bottom: 1px solid #111; display: flex; justify-content: space-between; align-items: center; }
         .log-action { font-weight: bold; }
-        .log-action.completar { color: #4caf50; }
+        .log-action.complete { color: #4caf50; }
         .lap-time { color: #00d4ff; font-weight: bold; margin-left: 5px; }
         .delta-pos { color: #4caf50; font-weight: bold; margin: 0 5px; } 
         .delta-neg { color: #f44336; font-weight: bold; margin: 0 5px; } 
@@ -38,20 +38,20 @@
 <body>
 <div class="container">
     <a href="https://discord.gg/CCT4c52RRz" target="_blank" class="gta-title-link">COLIVARESVRD</a>
-    <span class="session-info" id="session-display">SALA: GENERAL</span>
+    <span class="session-info" id="session-display">SESSION: GENERAL</span>
     <div class="setup-section" id="setup">
-        <span style="font-size: 0.6rem; color: #aaa;">CANTIDAD INICIAL:</span><br>
+        <span style="font-size: 0.6rem; color: #aaa;">INITIAL QUANTITY:</span><br>
         <input type="number" id="input-total" placeholder="0">
-        <button class="btn" id="btn-set">FIJAR Y EMPEZAR</button>
+        <button class="btn" id="btn-set">SET & START</button>
     </div>
     <div class="main-timer" id="display">00:00:00</div>
     <div class="stats">
-        <div class="box" style="border-left: 5px solid #ff9800;"><span>PENDIENTES</span><div class="count" id="c-pendientes" style="color:#ff9800">0</div></div>
-        <div class="box" style="border-left: 5px solid #4caf50;"><span>COMPLETADOS</span><div class="count" id="c-completados" style="color:#4caf50">0</div></div>
+        <div class="box" style="border-left: 5px solid #ff9800;"><span>PENDING</span><div class="count" id="c-pendientes" style="color:#ff9800">0</div></div>
+        <div class="box" style="border-left: 5px solid #4caf50;"><span>COMPLETED</span><div class="count" id="c-completados" style="color:#4caf50">0</div></div>
     </div>
-    <button class="btn" id="btn-complete">COMPLETAR (G)</button>
-    <button class="btn" id="btn-undo">DESHACER (Z)</button>
-    <button class="btn" id="btn-reset">REINICIAR SALA</button>
+    <button class="btn" id="btn-complete">COMPLETE (G)</button>
+    <button class="btn" id="btn-undo">UNDO (Z)</button>
+    <button class="btn" id="btn-reset">RESET SESSION</button>
     <div class="log-container" id="log-list"></div>
 </div>
 <script>
@@ -67,8 +67,8 @@
     const db = firebase.database();
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('sesion') || 'general';
-    document.getElementById('session-display').innerText = `SALA: ${sessionId.toUpperCase()}`;
-    const sessionRef = db.ref('audit_v_pro_es/' + sessionId);
+    document.getElementById('session-display').innerText = `SESSION: ${sessionId.toUpperCase()}`;
+    const sessionRef = db.ref('audit_v_pro_en/' + sessionId);
 
     let timerInterval = null;
 
@@ -104,8 +104,7 @@
         }
 
         const logHtml = (data.history || []).map(h => {
-            let deltaHtml = "";
-            let lapHtml = h.lap ? `<span class="lap-time">${h.lap}</span>` : "";
+            let deltaHtml = ""; let lapHtml = h.lap ? `<span class="lap-time">${h.lap}</span>` : "";
             if (h.delta) {
                 const className = h.delta.startsWith('-') ? 'delta-pos' : 'delta-neg';
                 deltaHtml = `<span class="${className}">(${h.delta})</span>`;
@@ -134,7 +133,7 @@
     document.getElementById('btn-set').onclick = () => {
         const total = parseInt(document.getElementById('input-total').value);
         if (total > 0) {
-            sessionRef.set({ pendientes: total, completados: 0, startAt: null, finishAt: null, totalInicial: total, locked: true, history: [{action: "fijar", val: total, split: "INICIO"}] });
+            sessionRef.set({ pendientes: total, completados: 0, startAt: null, finishAt: null, totalInicial: total, locked: true, history: [{action: "set", val: total, split: "START"}] });
         }
     };
 
@@ -150,7 +149,7 @@
             
             let deltaStr = ""; let currentLapMs = 0; let lapStr = "";
             const history = data.history || [];
-            const completionLogs = history.filter(l => l.action === 'completar');
+            const completionLogs = history.filter(l => l.action === 'complete');
             
             if (completionLogs.length > 0) {
                 const lastTotalMs = parseTimeToMs(completionLogs[completionLogs.length - 1].split);
@@ -171,7 +170,7 @@
             }
 
             if (!data.history) data.history = [];
-            data.history.push({ action: "completar", val: data.completados, split: currentSplitStr, lap: lapStr, delta: deltaStr });
+            data.history.push({ action: "complete", val: data.completados, split: currentSplitStr, lap: lapStr, delta: deltaStr });
             if (data.pendientes === 0) data.finishAt = now;
             sessionRef.set(data);
         });
@@ -182,7 +181,7 @@
             const data = snapshot.val();
             if (data && data.completados > 0) {
                 data.pendientes++; data.completados--; data.finishAt = null;
-                data.history.push({ action: "deshacer", val: "", split: formatTime(Date.now() - data.startAt) });
+                data.history.push({ action: "undo", val: "", split: formatTime(Date.now() - data.startAt) });
                 if (data.completados === 0) data.startAt = null;
                 sessionRef.set(data);
             }
@@ -190,7 +189,7 @@
     }
 
     document.getElementById('btn-reset').onclick = () => {
-        if (prompt(`Escribe "${sessionId}" para reiniciar:`) === sessionId) {
+        if (prompt(`Type "${sessionId}" to reset:`) === sessionId) {
             sessionRef.set({ pendientes: 0, completados: 0, startAt: null, finishAt: null, locked: false, history: [] });
         }
     };
