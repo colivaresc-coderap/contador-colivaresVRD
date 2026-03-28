@@ -3,37 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>COLIVARESVRD | FINAL CONTROL (EN)</title>
+    <title>COLIVARESVRD | PERFORMANCE MONITOR (EN)</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
         body { font-family: 'Arial Black', sans-serif; text-align: center; background: #0d0d0d; color: white; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-transform: uppercase; box-sizing: border-box; }
         .container { background: rgba(20, 20, 20, 0.98); padding: 20px; border-radius: 5px; box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); width: 100%; max-width: 450px; border: 1px solid #333; }
+        
         .gta-title-link { text-decoration: none; color: #00d4ff; font-size: 1.8rem; font-weight: 900; text-shadow: 2px 2px 0px #ff00d4; display: block; margin-bottom: 5px; transition: 0.3s; }
         .gta-title-link:hover { color: #ff00d4; text-shadow: 2px 2px 0px #00d4ff; }
+        
         .session-info { font-size: 0.7rem; color: #555; letter-spacing: 2px; margin-bottom: 10px; display: block; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
         .finished { animation: blink 0.8s infinite; color: #4caf50 !important; border-color: #4caf50 !important; }
+        
         .main-timer { font-size: 3.5rem; font-weight: bold; margin: 10px 0; color: #ff00d4; font-family: 'Courier New', monospace; text-shadow: 0 0 10px rgba(255, 0, 212, 0.5); border-bottom: 2px solid #ff00d4; display: inline-block; width: 100%; }
         .setup-section { background: #1a1a1a; padding: 15px; margin-bottom: 15px; border: 1px solid #00d4ff; }
         input { background: #000; border: 1px solid #00d4ff; color: #00d4ff; padding: 10px; width: 100px; text-align: center; font-family: 'Arial Black'; font-size: 1.2rem; margin: 5px 0; }
+        
         .stats { display: flex; gap: 10px; margin-bottom: 20px; }
         .box { flex: 1; padding: 15px; border: 1px solid #333; background: rgba(255,255,255,0.05); }
         .box span { font-size: 0.6rem; color: #888; display: block; margin-bottom: 5px; }
         .count { font-size: 2.5rem; font-weight: 900; }
+
         .btn { padding: 15px; font-size: 1rem; cursor: pointer; border: none; color: white; font-weight: bold; width: 100%; text-transform: uppercase; border: 2px solid; box-shadow: 0 4px 0px rgba(0,0,0,0.5); margin-bottom: 8px; transition: 0.1s; }
-        #btn-complete { background: #2e7d32; border-color: #4caf50; height: 70px; font-size: 1.3rem; }
+        #btn-complete { background: #2e7d32; border-color: #4caf50; height: 70px; font-size: 1.4rem; }
         #btn-set { background: #008ba3; border-color: #00d4ff; width: auto; font-size: 0.8rem; }
         #btn-reset { background: #d32f2f; border-color: #f44336; font-size: 0.7rem; margin-top: 10px; opacity: 0.8; }
         #btn-undo { background: #455a64; border-color: #607d8b; font-size: 0.8rem; }
-        .btn:active { transform: translateY(3px); box-shadow: none; }
-        .btn:disabled { background: #1a1a1a; border-color: #333; color: #444; cursor: not-allowed; transform: none; box-shadow: none; }
-        .log-container { margin-top: 20px; text-align: left; max-height: 120px; overflow-y: auto; background: #000; padding: 10px; border: 1px solid #222; font-family: monospace; font-size: 0.75rem; }
-        .log-entry { padding: 5px 0; border-bottom: 1px solid #111; display: flex; justify-content: space-between; }
-        .log-action.set { color: #00d4ff; }
+
+        .log-container { margin-top: 20px; text-align: left; max-height: 150px; overflow-y: auto; background: #000; padding: 10px; border: 1px solid #222; font-family: monospace; font-size: 0.75rem; }
+        .log-entry { padding: 5px 0; border-bottom: 1px solid #111; display: flex; justify-content: space-between; align-items: center; }
+        .log-split { color: #aaa; }
+        .delta-pos { color: #4caf50; font-weight: bold; } /* Green: Faster */
+        .delta-neg { color: #f44336; font-weight: bold; } /* Red: Slower */
         .log-action.complete { color: #4caf50; }
-        .log-action.undo { color: #f44336; }
-        .log-split { color: #aaa; font-style: italic; }
     </style>
 </head>
 <body>
@@ -77,64 +81,9 @@
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('sesion') || 'general';
     document.getElementById('session-display').innerText = `SESSION: ${sessionId.toUpperCase()}`;
-    const sessionRef = db.ref('audit_vfinal_en/' + sessionId); // Nueva ruta para datos limpios
+    const sessionRef = db.ref('audit_v_delta_en/' + sessionId);
 
     let timerInterval = null;
-
-    function enviarADiscord(sesion, inicial, tiempo) {
-        const WEBHOOK_URL = "https://discord.com/api/webhooks/1487229496166842508/E7ao4Z0VempUpkaAnKdYawDi16sRQKctk0N7N40owyFUp8bGayeXFYf81yuKoP83_KHM"; 
-        const payload = {
-            username: "ColivaresVRD",
-            avatar_url: "https://i.imgur.com/vHq7FhY.png",
-            content: "@everyone 🚨 **MISSION ACCOMPLISHED!** 🚨",
-            embeds: [{
-                title: "✅ SESSION REPORT COMPLETED",
-                color: 3066993, 
-                fields: [
-                    { name: "📍 Session", value: `\`${sesion.toUpperCase()}\``, inline: true },
-                    { name: "📦 Initial Qty", value: `\`${inicial}\``, inline: true },
-                    { name: "⏱️ Total Time", value: `\`${tiempo}\``, inline: true }
-                ],
-                footer: { text: "ColivaresVRD System | " + new Date().toLocaleString() }
-            }]
-        };
-        fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    }
-
-    sessionRef.on('value', (snapshot) => {
-        const data = snapshot.val() || { pendientes: 0, completados: 0, startAt: null, finishAt: null, totalInicial: 0, history: [], locked: false, reportSent: false };
-        document.getElementById('c-pendientes').innerText = data.pendientes;
-        document.getElementById('c-completados').innerText = data.completados;
-        document.getElementById('setup').style.display = data.locked ? 'none' : 'block';
-
-        const isFinished = data.pendientes === 0 && data.completados > 0;
-        if (isFinished) {
-            document.getElementById('display').classList.add('finished');
-            document.getElementById('btn-complete').disabled = true;
-            clearInterval(timerInterval);
-            timerInterval = null;
-            const finalTime = formatTime(data.finishAt - data.startAt);
-            document.getElementById('display').innerText = finalTime;
-            if (!data.reportSent) {
-                enviarADiscord(sessionId, data.totalInicial, finalTime);
-                sessionRef.update({ reportSent: true });
-            }
-        } else {
-            document.getElementById('display').classList.remove('finished');
-            document.getElementById('btn-complete').disabled = false;
-            if (data.startAt) { if (!timerInterval) startTimer(data.startAt); } else { stopTimer(); }
-        }
-
-        const logHtml = (data.history || []).map(h => `
-            <div class="log-entry">
-                <span class="log-action ${h.action.toLowerCase()}">${h.action.toUpperCase()}: ${h.val || ''}</span>
-                <span class="log-split">⏱️ ${h.split}</span>
-            </div>
-        `).join('');
-        const logDiv = document.getElementById('log-list');
-        logDiv.innerHTML = logHtml;
-        logDiv.scrollTop = logDiv.scrollHeight;
-    });
 
     function formatTime(ms) {
         if (ms < 0) ms = 0;
@@ -145,50 +94,100 @@
         return `${h}:${m}:${sec}`;
     }
 
+    function parseTimeToMs(timeStr) {
+        const parts = timeStr.split(':');
+        return ((parseInt(parts[0]) * 3600) + (parseInt(parts[1]) * 60) + parseInt(parts[2])) * 1000;
+    }
+
+    sessionRef.on('value', (snapshot) => {
+        const data = snapshot.val() || { pendientes: 0, completados: 0, startAt: null, finishAt: null, totalInicial: 0, history: [], locked: false };
+        document.getElementById('c-pendientes').innerText = data.pendientes;
+        document.getElementById('c-completados').innerText = data.completados;
+        document.getElementById('setup').style.display = data.locked ? 'none' : 'block';
+
+        const isFinished = data.pendientes === 0 && data.completados > 0;
+        if (isFinished) {
+            document.getElementById('display').classList.add('finished');
+            clearInterval(timerInterval);
+            timerInterval = null;
+            document.getElementById('display').innerText = formatTime(data.finishAt - data.startAt);
+        } else {
+            document.getElementById('display').classList.remove('finished');
+            if (data.startAt) { if (!timerInterval) startTimer(data.startAt); } else { stopTimer(); }
+        }
+
+        const logHtml = (data.history || []).map(h => {
+            let deltaHtml = "";
+            if (h.delta) {
+                const className = h.delta.startsWith('-') ? 'delta-pos' : 'delta-neg';
+                deltaHtml = `<span class="${className}">(${h.delta})</span>`;
+            }
+            return `
+                <div class="log-entry">
+                    <span class="log-action ${h.action}">${h.action.toUpperCase()} ${h.val || ''}</span>
+                    <span>${deltaHtml} <span class="log-split">⏱️ ${h.split}</span></span>
+                </div>
+            `;
+        }).join('');
+        const logDiv = document.getElementById('log-list');
+        logDiv.innerHTML = logHtml;
+        logDiv.scrollTop = logDiv.scrollHeight;
+    });
+
     function startTimer(start) {
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
-            const diff = Date.now() - start;
-            document.getElementById('display').innerText = formatTime(diff);
+            document.getElementById('display').innerText = formatTime(Date.now() - start);
         }, 1000);
     }
 
-    function stopTimer() {
-        clearInterval(timerInterval);
-        timerInterval = null;
-        document.getElementById('display').innerText = "00:00:00";
-    }
-
-    function calculateSplit(startAt) {
-        if (!startAt) return "00:00:00";
-        return formatTime(Date.now() - startAt);
-    }
+    function stopTimer() { clearInterval(timerInterval); timerInterval = null; document.getElementById('display').innerText = "00:00:00"; }
 
     document.getElementById('btn-set').onclick = () => {
         const total = parseInt(document.getElementById('input-total').value);
         if (total > 0) {
-            sessionRef.set({ pendientes: total, completados: 0, startAt: null, finishAt: null, totalInicial: total, locked: true, history: [{action: "set", val: total, split: "START"}], reportSent: false });
+            sessionRef.set({ pendientes: total, completados: 0, startAt: null, finishAt: null, totalInicial: total, locked: true, history: [{action: "set", val: total, split: "START"}] });
         }
     };
 
     function completeTask() {
         sessionRef.once('value', (snapshot) => {
             const data = snapshot.val();
-            if (data && data.pendientes > 0) {
-                let currentSplit = "";
-                if (!data.startAt) {
-                    data.startAt = Date.now();
-                    currentSplit = "00:00:00";
-                } else {
-                    currentSplit = calculateSplit(data.startAt);
+            if (!data || data.pendientes <= 0) return;
+            
+            const now = Date.now();
+            if (!data.startAt) data.startAt = now;
+            
+            const totalElapsedMs = now - data.startAt;
+            const currentSplitStr = formatTime(totalElapsedMs);
+            
+            data.pendientes--;
+            data.completados++;
+            
+            let deltaStr = "";
+            // Comparison logic starts after the 3rd completed item
+            if (data.completados >= 3) {
+                const history = data.history || [];
+                const completionLogs = history.filter(l => l.action === 'complete');
+                
+                if (completionLogs.length >= 1) {
+                    const lastLog = completionLogs[completionLogs.length - 1];
+                    const secondLastLog = completionLogs[completionLogs.length - 2];
+                    
+                    const lastMs = parseTimeToMs(lastLog.split);
+                    const prevMs = (completionLogs.length >= 2) ? (lastMs - parseTimeToMs(secondLastLog.split)) : lastMs;
+                    
+                    const currentLapMs = totalElapsedMs - lastMs;
+                    const diffS = Math.round((currentLapMs - prevMs) / 1000);
+                    
+                    deltaStr = diffS <= 0 ? `${diffS}s` : `+${diffS}s`;
                 }
-                data.pendientes--;
-                data.completados++;
-                if (!data.history) data.history = [];
-                data.history.push({ action: "complete", val: data.completados, split: currentSplit });
-                if (data.pendientes === 0) data.finishAt = Date.now();
-                sessionRef.set(data);
             }
+
+            if (!data.history) data.history = [];
+            data.history.push({ action: "complete", val: data.completados, split: currentSplitStr, delta: deltaStr });
+            if (data.pendientes === 0) data.finishAt = now;
+            sessionRef.set(data);
         });
     }
 
@@ -196,12 +195,8 @@
         sessionRef.once('value', (snapshot) => {
             const data = snapshot.val();
             if (data && data.completados > 0) {
-                const currentSplit = calculateSplit(data.startAt);
-                data.pendientes++;
-                data.completados--;
-                data.finishAt = null;
-                data.reportSent = false;
-                data.history.push({ action: "undo", val: "", split: currentSplit });
+                data.pendientes++; data.completados--; data.finishAt = null;
+                data.history.push({ action: "undo", val: "", split: formatTime(Date.now() - data.startAt) });
                 if (data.completados === 0) data.startAt = null;
                 sessionRef.set(data);
             }
@@ -210,16 +205,13 @@
 
     document.getElementById('btn-reset').onclick = () => {
         if (prompt(`Type "${sessionId}" to reset:`) === sessionId) {
-            sessionRef.set({ pendientes: 0, completados: 0, startAt: null, finishAt: null, locked: false, history: [], reportSent: false });
+            sessionRef.set({ pendientes: 0, completados: 0, startAt: null, finishAt: null, locked: false, history: [] });
         }
     };
 
     document.getElementById('btn-complete').onclick = completeTask;
-    document.getElementById('btn-undo').undo = undo;
-    document.addEventListener('keydown', (e) => {
-        if(e.key.toLowerCase()==='g') completeTask();
-        if(e.key.toLowerCase()==='z') undo();
-    });
+    document.getElementById('btn-undo').onclick = undo;
+    document.addEventListener('keydown', (e) => { if(e.key.toLowerCase()==='g') completeTask(); if(e.key.toLowerCase()==='z') undo(); });
 </script>
 </body>
 </html>
