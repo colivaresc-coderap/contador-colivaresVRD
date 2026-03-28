@@ -10,7 +10,7 @@
         body { 
             font-family: 'Arial Black', sans-serif; text-align: center; 
             background-color: #0d0d0d;
-            background-image: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.9)), url('https://i.imgur.com/8N4I8nI.png'); 
+            background-image: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.9)), url('https://i.ibb.co/LzYvXmK/garaje-gta.png'); 
             background-size: cover; background-position: center; background-attachment: fixed;
             color: white; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-transform: uppercase; box-sizing: border-box; 
         }
@@ -88,7 +88,6 @@
             return `<div class="log-entry"><span>${h.action.toUpperCase()} ${h.val || ''} <span style="color:#00d4ff;">${h.lap || ''}</span></span><span>${deltaHtml} <span style="color:#555;">TOT: ${h.split}</span></span></div>`;
         }).join('');
         document.getElementById('log-list').innerHTML = logHtml;
-        document.getElementById('log-list').scrollTop = document.getElementById('log-list').scrollHeight;
     });
 
     document.getElementById('btn-set').onclick = () => {
