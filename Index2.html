@@ -68,7 +68,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('sesion') || 'general';
     document.getElementById('session-display').innerText = `SESSION: ${sessionId.toUpperCase()}`;
-    const sessionRef = db.ref('audit_v_pro_en/' + sessionId);
+    const sessionRef = db.ref('audit_v_precise_en/' + sessionId);
 
     let timerInterval = null;
 
@@ -133,16 +133,24 @@
     document.getElementById('btn-set').onclick = () => {
         const total = parseInt(document.getElementById('input-total').value);
         if (total > 0) {
-            sessionRef.set({ pendientes: total, completados: 0, startAt: null, finishAt: null, totalInicial: total, locked: true, history: [{action: "set", val: total, split: "START"}] });
+            const startTime = Date.now();
+            sessionRef.set({ 
+                pendientes: total, 
+                completados: 0, 
+                startAt: startTime, 
+                finishAt: null, 
+                totalInicial: total, 
+                locked: true, 
+                history: [{action: "set", val: total, split: "00:00:00"}] 
+            });
         }
     };
 
     function completeTask() {
         sessionRef.once('value', (snapshot) => {
             const data = snapshot.val();
-            if (!data || data.pendientes <= 0) return;
+            if (!data || data.pendientes <= 0 || !data.startAt) return;
             const now = Date.now();
-            if (!data.startAt) data.startAt = now;
             const totalElapsedMs = now - data.startAt;
             const currentSplitStr = formatTime(totalElapsedMs);
             data.pendientes--; data.completados++;
@@ -182,7 +190,6 @@
             if (data && data.completados > 0) {
                 data.pendientes++; data.completados--; data.finishAt = null;
                 data.history.push({ action: "undo", val: "", split: formatTime(Date.now() - data.startAt) });
-                if (data.completados === 0) data.startAt = null;
                 sessionRef.set(data);
             }
         });
