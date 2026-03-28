@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>COLIVARESVRD | CONTROL FINAL</title>
+    <title>COLIVARESVRD | PERFORMANCE</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
         body { font-family: 'Arial Black', sans-serif; text-align: center; background: #0d0d0d; color: white; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-transform: uppercase; box-sizing: border-box; }
         .container { background: rgba(20, 20, 20, 0.98); padding: 20px; border-radius: 5px; box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); width: 100%; max-width: 450px; border: 1px solid #333; }
         .gta-title-link { text-decoration: none; color: #00d4ff; font-size: 1.8rem; font-weight: 900; text-shadow: 2px 2px 0px #ff00d4; display: block; margin-bottom: 5px; transition: 0.3s; }
-        .gta-title-link:hover { color: #ff00d4; text-shadow: 2px 2px 0px #00d4ff; }
         .session-info { font-size: 0.7rem; color: #555; letter-spacing: 2px; margin-bottom: 10px; display: block; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
         .finished { animation: blink 0.8s infinite; color: #4caf50 !important; border-color: #4caf50 !important; }
@@ -22,18 +21,16 @@
         .box span { font-size: 0.6rem; color: #888; display: block; margin-bottom: 5px; }
         .count { font-size: 2.5rem; font-weight: 900; }
         .btn { padding: 15px; font-size: 1rem; cursor: pointer; border: none; color: white; font-weight: bold; width: 100%; text-transform: uppercase; border: 2px solid; box-shadow: 0 4px 0px rgba(0,0,0,0.5); margin-bottom: 8px; transition: 0.1s; }
-        #btn-complete { background: #2e7d32; border-color: #4caf50; height: 70px; font-size: 1.3rem; }
+        #btn-complete { background: #2e7d32; border-color: #4caf50; height: 70px; font-size: 1.4rem; }
         #btn-set { background: #008ba3; border-color: #00d4ff; width: auto; font-size: 0.8rem; }
         #btn-reset { background: #d32f2f; border-color: #f44336; font-size: 0.7rem; margin-top: 10px; opacity: 0.8; }
         #btn-undo { background: #455a64; border-color: #607d8b; font-size: 0.8rem; }
-        .btn:active { transform: translateY(3px); box-shadow: none; }
-        .btn:disabled { background: #1a1a1a; border-color: #333; color: #444; cursor: not-allowed; transform: none; box-shadow: none; }
-        .log-container { margin-top: 20px; text-align: left; max-height: 120px; overflow-y: auto; background: #000; padding: 10px; border: 1px solid #222; font-family: monospace; font-size: 0.75rem; }
-        .log-entry { padding: 5px 0; border-bottom: 1px solid #111; display: flex; justify-content: space-between; }
-        .log-action.fijar { color: #00d4ff; }
+        .log-container { margin-top: 20px; text-align: left; max-height: 150px; overflow-y: auto; background: #000; padding: 10px; border: 1px solid #222; font-family: monospace; font-size: 0.75rem; }
+        .log-entry { padding: 5px 0; border-bottom: 1px solid #111; display: flex; justify-content: space-between; align-items: center; }
+        .log-split { color: #aaa; }
+        .delta-pos { color: #4caf50; font-weight: bold; } /* Verde: Mejor tiempo */
+        .delta-neg { color: #f44336; font-weight: bold; } /* Rojo: Peor tiempo */
         .log-action.completar { color: #4caf50; }
-        .log-action.deshacer { color: #f44336; }
-        .log-split { color: #aaa; font-style: italic; }
     </style>
 </head>
 <body>
@@ -63,7 +60,6 @@
 </div>
 
 <script>
-    // --- MANTENER FIREBASE IGUAL (USANDO TU KEY EXISTENTE) ---
     const firebaseConfig = {
       apiKey: "AIzaSyCcRPE7BCaQVOepkfMFRRDOgTnigcO4218",
       authDomain: "contador-colivares.firebaseapp.com",
@@ -78,34 +74,12 @@
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('sesion') || 'general';
     document.getElementById('session-display').innerText = `SALA: ${sessionId.toUpperCase()}`;
-    const sessionRef = db.ref('audit_vfinal_es/' + sessionId); // Nueva ruta para datos limpios
+    const sessionRef = db.ref('audit_v_delta_es/' + sessionId);
 
     let timerInterval = null;
 
-    // Discord Webhook (Mismo webhook)
-    function enviarADiscord(sesion, inicial, tiempo) {
-        const WEBHOOK_URL = "https://discord.com/api/webhooks/1487229496166842508/E7ao4Z0VempUpkaAnKdYawDi16sRQKctk0N7N40owyFUp8bGayeXFYf81yuKoP83_KHM"; 
-        const payload = {
-            username: "ColivaresVRD",
-            avatar_url: "https://i.imgur.com/vHq7FhY.png",
-            content: "@everyone 🚨 **¡MISIÓN FINALIZADA!** 🚨",
-            embeds: [{
-                title: "✅ REPORTE DE SESIÓN COMPLETADO",
-                color: 3066993, 
-                fields: [
-                    { name: "📍 Sesión", value: `\`${sesion.toUpperCase()}\``, inline: true },
-                    { name: "📦 Cantidad Inicial", value: `\`${inicial}\``, inline: true },
-                    { name: "⏱️ Tiempo Total", value: `\`${tiempo}\``, inline: true }
-                ],
-                footer: { text: "ColivaresVRD System | " + new Date().toLocaleString() }
-            }]
-        };
-        fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    }
-
     sessionRef.on('value', (snapshot) => {
-        const data = snapshot.val() || { pendientes: 0, completados: 0, startAt: null, finishAt: null, totalInicial: 0, history: [], locked: false, reportSent: false };
-        
+        const data = snapshot.val() || { pendientes: 0, completados: 0, startAt: null, finishAt: null, totalInicial: 0, history: [], locked: false };
         document.getElementById('c-pendientes').innerText = data.pendientes;
         document.getElementById('c-completados').innerText = data.completados;
         document.getElementById('setup').style.display = data.locked ? 'none' : 'block';
@@ -113,35 +87,33 @@
         const isFinished = data.pendientes === 0 && data.completados > 0;
         if (isFinished) {
             document.getElementById('display').classList.add('finished');
-            document.getElementById('btn-complete').disabled = true;
             clearInterval(timerInterval);
             timerInterval = null;
-            const finalTime = formatTime(data.finishAt - data.startAt);
-            document.getElementById('display').innerText = finalTime;
-            if (!data.reportSent) {
-                enviarADiscord(sessionId, data.totalInicial, finalTime);
-                sessionRef.update({ reportSent: true });
-            }
+            document.getElementById('display').innerText = formatTime(data.finishAt - data.startAt);
         } else {
             document.getElementById('display').classList.remove('finished');
-            document.getElementById('btn-complete').disabled = false;
             if (data.startAt) { if (!timerInterval) startTimer(data.startAt); } else { stopTimer(); }
         }
 
-        // Renderizado del Historial con Tiempo de Split
-        const logHtml = (data.history || []).map(h => `
-            <div class="log-entry">
-                <span class="log-action ${h.action.toLowerCase()}">${h.action.toUpperCase()}: ${h.val || ''}</span>
-                <span class="log-split">⏱️ ${h.split}</span>
-            </div>
-        `).join('');
+        const logHtml = (data.history || []).map(h => {
+            let deltaHtml = "";
+            if (h.delta) {
+                const className = h.delta.startsWith('-') ? 'delta-pos' : 'delta-neg';
+                deltaHtml = `<span class="${className}">(${h.delta})</span>`;
+            }
+            return `
+                <div class="log-entry">
+                    <span class="log-action ${h.action}">${h.action.toUpperCase()} ${h.val || ''}</span>
+                    <span>${deltaHtml} <span class="log-split">${h.split}</span></span>
+                </div>
+            `;
+        }).join('');
         const logDiv = document.getElementById('log-list');
         logDiv.innerHTML = logHtml;
         logDiv.scrollTop = logDiv.scrollHeight;
     });
 
     function formatTime(ms) {
-        if (ms < 0) ms = 0;
         const s = Math.floor(ms / 1000);
         const h = Math.floor(s / 3600).toString().padStart(2, '0');
         const m = Math.floor((s % 3600) / 60).toString().padStart(2, '0');
@@ -152,60 +124,73 @@
     function startTimer(start) {
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
-            const diff = Date.now() - start;
-            document.getElementById('display').innerText = formatTime(diff);
+            document.getElementById('display').innerText = formatTime(Date.now() - start);
         }, 1000);
     }
 
-    function stopTimer() {
-        clearInterval(timerInterval);
-        timerInterval = null;
-        document.getElementById('display').innerText = "00:00:00";
-    }
-
-    function calculateSplit(startAt) {
-        if (!startAt) return "00:00:00";
-        return formatTime(Date.now() - startAt);
-    }
+    function stopTimer() { clearInterval(timerInterval); timerInterval = null; document.getElementById('display').innerText = "00:00:00"; }
 
     document.getElementById('btn-set').onclick = () => {
         const total = parseInt(document.getElementById('input-total').value);
         if (total > 0) {
-            sessionRef.set({ pendientes: total, completados: 0, startAt: null, finishAt: null, totalInicial: total, locked: true, history: [{action: "fijar", val: total, split: "START"}], reportSent: false });
+            sessionRef.set({ pendientes: total, completados: 0, startAt: null, finishAt: null, totalInicial: total, locked: true, history: [{action: "fijar", val: total, split: "START"}] });
         }
     };
 
     function completeTask() {
         sessionRef.once('value', (snapshot) => {
             const data = snapshot.val();
-            if (data && data.pendientes > 0) {
-                let currentSplit = "";
-                if (!data.startAt) {
-                    data.startAt = Date.now();
-                    currentSplit = "00:00:00";
-                } else {
-                    currentSplit = calculateSplit(data.startAt);
+            if (!data || data.pendientes <= 0) return;
+            
+            const now = Date.now();
+            if (!data.startAt) data.startAt = now;
+            
+            const totalElapsedMs = now - data.startAt;
+            const currentSplitStr = formatTime(totalElapsedMs);
+            
+            data.pendientes--;
+            data.completados++;
+            
+            let deltaStr = "";
+            // Lógica Delta: A partir del 3er completado (Índice en historial suele ser comp+1 por el 'fijar')
+            if (data.completados >= 3) {
+                const history = data.history || [];
+                // Buscamos el último "completar" para comparar lapsos
+                const completionLogs = history.filter(l => l.action === 'completar');
+                if (completionLogs.length >= 1) {
+                    const lastLog = completionLogs[completionLogs.length - 1];
+                    const secondLastLog = completionLogs[completionLogs.length - 2];
+                    
+                    // Tiempo del último lapso (este clic - clic anterior)
+                    const lastMs = parseTimeToMs(lastLog.split);
+                    const prevMs = (completionLogs.length >= 2) ? (lastMs - parseTimeToMs(secondLastLog.split)) : lastMs;
+                    
+                    const currentLapMs = totalElapsedMs - lastMs;
+                    const diffS = Math.round((currentLapMs - prevMs) / 1000);
+                    
+                    if (diffS <= 0) deltaStr = `${diffS}s`;
+                    else deltaStr = `+${diffS}s`;
                 }
-                data.pendientes--;
-                data.completados++;
-                if (!data.history) data.history = [];
-                data.history.push({ action: "completar", val: data.completados, split: currentSplit });
-                if (data.pendientes === 0) data.finishAt = Date.now();
-                sessionRef.set(data);
             }
+
+            if (!data.history) data.history = [];
+            data.history.push({ action: "completar", val: data.completados, split: currentSplitStr, delta: deltaStr });
+            if (data.pendientes === 0) data.finishAt = now;
+            sessionRef.set(data);
         });
+    }
+
+    function parseTimeToMs(timeStr) {
+        const parts = timeStr.split(':');
+        return ((parseInt(parts[0]) * 3600) + (parseInt(parts[1]) * 60) + parseInt(parts[2])) * 1000;
     }
 
     function undo() {
         sessionRef.once('value', (snapshot) => {
             const data = snapshot.val();
             if (data && data.completados > 0) {
-                const currentSplit = calculateSplit(data.startAt);
-                data.pendientes++;
-                data.completados--;
-                data.finishAt = null;
-                data.reportSent = false;
-                data.history.push({ action: "deshacer", val: "", split: currentSplit });
+                data.pendientes++; data.completados--; data.finishAt = null;
+                data.history.push({ action: "deshacer", val: "", split: formatTime(Date.now() - data.startAt) });
                 if (data.completados === 0) data.startAt = null;
                 sessionRef.set(data);
             }
@@ -214,16 +199,13 @@
 
     document.getElementById('btn-reset').onclick = () => {
         if (prompt(`Escribe "${sessionId}" para reiniciar:`) === sessionId) {
-            sessionRef.set({ pendientes: 0, completados: 0, startAt: null, finishAt: null, locked: false, history: [], reportSent: false });
+            sessionRef.set({ pendientes: 0, completados: 0, startAt: null, finishAt: null, locked: false, history: [] });
         }
     };
 
     document.getElementById('btn-complete').onclick = completeTask;
     document.getElementById('btn-undo').onclick = undo;
-    document.addEventListener('keydown', (e) => {
-        if(e.key.toLowerCase()==='g') completeTask();
-        if(e.key.toLowerCase()==='z') undo();
-    });
+    document.addEventListener('keydown', (e) => { if(e.key.toLowerCase()==='g') completeTask(); if(e.key.toLowerCase()==='z') undo(); });
 </script>
 </body>
 </html>
