@@ -8,64 +8,52 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
         body { font-family: 'Arial Black', sans-serif; text-align: center; background: #0d0d0d; color: white; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-transform: uppercase; box-sizing: border-box; }
-        .container { background: rgba(20, 20, 20, 0.98); padding: 20px; border-radius: 5px; box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); width: 100%; max-width: 450px; border: 1px solid #333; }
-        
+        .container { background: rgba(20, 20, 20, 0.98); padding: 20px; border-radius: 5px; box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); width: 100%; max-width: 480px; border: 1px solid #333; }
         .gta-title-link { text-decoration: none; color: #00d4ff; font-size: 1.8rem; font-weight: 900; text-shadow: 2px 2px 0px #ff00d4; display: block; margin-bottom: 5px; transition: 0.3s; }
-        .gta-title-link:hover { color: #ff00d4; text-shadow: 2px 2px 0px #00d4ff; }
-        
         .session-info { font-size: 0.7rem; color: #555; letter-spacing: 2px; margin-bottom: 10px; display: block; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
         .finished { animation: blink 0.8s infinite; color: #4caf50 !important; border-color: #4caf50 !important; }
-        
         .main-timer { font-size: 3.5rem; font-weight: bold; margin: 10px 0; color: #ff00d4; font-family: 'Courier New', monospace; text-shadow: 0 0 10px rgba(255, 0, 212, 0.5); border-bottom: 2px solid #ff00d4; display: inline-block; width: 100%; }
         .setup-section { background: #1a1a1a; padding: 15px; margin-bottom: 15px; border: 1px solid #00d4ff; }
         input { background: #000; border: 1px solid #00d4ff; color: #00d4ff; padding: 10px; width: 100px; text-align: center; font-family: 'Arial Black'; font-size: 1.2rem; margin: 5px 0; }
-        
         .stats { display: flex; gap: 10px; margin-bottom: 20px; }
         .box { flex: 1; padding: 15px; border: 1px solid #333; background: rgba(255,255,255,0.05); }
         .box span { font-size: 0.6rem; color: #888; display: block; margin-bottom: 5px; }
         .count { font-size: 2.5rem; font-weight: 900; }
-
         .btn { padding: 15px; font-size: 1rem; cursor: pointer; border: none; color: white; font-weight: bold; width: 100%; text-transform: uppercase; border: 2px solid; box-shadow: 0 4px 0px rgba(0,0,0,0.5); margin-bottom: 8px; transition: 0.1s; }
         #btn-complete { background: #2e7d32; border-color: #4caf50; height: 70px; font-size: 1.4rem; }
         #btn-set { background: #008ba3; border-color: #00d4ff; width: auto; font-size: 0.8rem; }
         #btn-reset { background: #d32f2f; border-color: #f44336; font-size: 0.7rem; margin-top: 10px; opacity: 0.8; }
         #btn-undo { background: #455a64; border-color: #607d8b; font-size: 0.8rem; }
-
-        .log-container { margin-top: 20px; text-align: left; max-height: 150px; overflow-y: auto; background: #000; padding: 10px; border: 1px solid #222; font-family: monospace; font-size: 0.75rem; }
-        .log-entry { padding: 5px 0; border-bottom: 1px solid #111; display: flex; justify-content: space-between; align-items: center; }
-        .log-split { color: #aaa; }
-        .delta-pos { color: #4caf50; font-weight: bold; } /* Green: Faster */
-        .delta-neg { color: #f44336; font-weight: bold; } /* Red: Slower */
+        .log-container { margin-top: 20px; text-align: left; max-height: 180px; overflow-y: auto; background: #000; padding: 10px; border: 1px solid #222; font-family: monospace; font-size: 0.7rem; }
+        .log-entry { padding: 6px 0; border-bottom: 1px solid #111; display: flex; justify-content: space-between; align-items: center; }
+        .log-action { font-weight: bold; }
         .log-action.complete { color: #4caf50; }
+        .lap-time { color: #00d4ff; font-weight: bold; margin-left: 5px; }
+        .delta-pos { color: #4caf50; font-weight: bold; margin: 0 5px; } 
+        .delta-neg { color: #f44336; font-weight: bold; margin: 0 5px; } 
+        .total-time { color: #555; font-size: 0.65rem; }
     </style>
 </head>
 <body>
-
 <div class="container">
     <a href="https://discord.gg/CCT4c52RRz" target="_blank" class="gta-title-link">COLIVARESVRD</a>
     <span class="session-info" id="session-display">SESSION: GENERAL</span>
-    
     <div class="setup-section" id="setup">
         <span style="font-size: 0.6rem; color: #aaa;">INITIAL QUANTITY:</span><br>
         <input type="number" id="input-total" placeholder="0">
         <button class="btn" id="btn-set">SET & START</button>
     </div>
-
     <div class="main-timer" id="display">00:00:00</div>
-
     <div class="stats">
         <div class="box" style="border-left: 5px solid #ff9800;"><span>PENDING</span><div class="count" id="c-pendientes" style="color:#ff9800">0</div></div>
         <div class="box" style="border-left: 5px solid #4caf50;"><span>COMPLETED</span><div class="count" id="c-completados" style="color:#4caf50">0</div></div>
     </div>
-
     <button class="btn" id="btn-complete">COMPLETE (G)</button>
     <button class="btn" id="btn-undo">UNDO (Z)</button>
     <button class="btn" id="btn-reset">RESET SESSION</button>
-
     <div class="log-container" id="log-list"></div>
 </div>
-
 <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCcRPE7BCaQVOepkfMFRRDOgTnigcO4218",
@@ -75,13 +63,12 @@
       storageBucket: "contador-colivares.firebasestorage.app",
       appId: "1:774526373630:web:a0f15a1c6727a50b2c1faf"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('sesion') || 'general';
     document.getElementById('session-display').innerText = `SESSION: ${sessionId.toUpperCase()}`;
-    const sessionRef = db.ref('audit_v_delta_en/' + sessionId);
+    const sessionRef = db.ref('audit_v_pro_en/' + sessionId);
 
     let timerInterval = null;
 
@@ -117,15 +104,15 @@
         }
 
         const logHtml = (data.history || []).map(h => {
-            let deltaHtml = "";
+            let deltaHtml = ""; let lapHtml = h.lap ? `<span class="lap-time">${h.lap}</span>` : "";
             if (h.delta) {
                 const className = h.delta.startsWith('-') ? 'delta-pos' : 'delta-neg';
                 deltaHtml = `<span class="${className}">(${h.delta})</span>`;
             }
             return `
                 <div class="log-entry">
-                    <span class="log-action ${h.action}">${h.action.toUpperCase()} ${h.val || ''}</span>
-                    <span>${deltaHtml} <span class="log-split">⏱️ ${h.split}</span></span>
+                    <span class="log-action ${h.action}">${h.action.toUpperCase()} ${h.val || ''} ${lapHtml}</span>
+                    <span>${deltaHtml} <span class="total-time">TOT: ${h.split}</span></span>
                 </div>
             `;
         }).join('');
@@ -154,38 +141,36 @@
         sessionRef.once('value', (snapshot) => {
             const data = snapshot.val();
             if (!data || data.pendientes <= 0) return;
-            
             const now = Date.now();
             if (!data.startAt) data.startAt = now;
-            
             const totalElapsedMs = now - data.startAt;
             const currentSplitStr = formatTime(totalElapsedMs);
+            data.pendientes--; data.completados++;
             
-            data.pendientes--;
-            data.completados++;
+            let deltaStr = ""; let currentLapMs = 0; let lapStr = "";
+            const history = data.history || [];
+            const completionLogs = history.filter(l => l.action === 'complete');
             
-            let deltaStr = "";
-            // Comparison logic starts after the 3rd completed item
+            if (completionLogs.length > 0) {
+                const lastTotalMs = parseTimeToMs(completionLogs[completionLogs.length - 1].split);
+                currentLapMs = totalElapsedMs - lastTotalMs;
+                lapStr = formatTime(currentLapMs);
+            } else {
+                currentLapMs = totalElapsedMs; lapStr = formatTime(currentLapMs);
+            }
+
             if (data.completados >= 3) {
-                const history = data.history || [];
-                const completionLogs = history.filter(l => l.action === 'complete');
-                
-                if (completionLogs.length >= 1) {
-                    const lastLog = completionLogs[completionLogs.length - 1];
-                    const secondLastLog = completionLogs[completionLogs.length - 2];
-                    
-                    const lastMs = parseTimeToMs(lastLog.split);
-                    const prevMs = (completionLogs.length >= 2) ? (lastMs - parseTimeToMs(secondLastLog.split)) : lastMs;
-                    
-                    const currentLapMs = totalElapsedMs - lastMs;
-                    const diffS = Math.round((currentLapMs - prevMs) / 1000);
-                    
-                    deltaStr = diffS <= 0 ? `${diffS}s` : `+${diffS}s`;
-                }
+                const lastLog = completionLogs[completionLogs.length - 1];
+                const secondLastLog = completionLogs[completionLogs.length - 2];
+                const lastTotalMs = parseTimeToMs(lastLog.split);
+                const secondLastTotalMs = secondLastLog ? parseTimeToMs(secondLastLog.split) : 0;
+                const prevLapMs = lastTotalMs - secondLastTotalMs;
+                const diffActualS = Math.round((currentLapMs - prevLapMs) / 1000);
+                deltaStr = diffActualS <= 0 ? `${diffActualS}s` : `+${diffActualS}s`;
             }
 
             if (!data.history) data.history = [];
-            data.history.push({ action: "complete", val: data.completados, split: currentSplitStr, delta: deltaStr });
+            data.history.push({ action: "complete", val: data.completados, split: currentSplitStr, lap: lapStr, delta: deltaStr });
             if (data.pendientes === 0) data.finishAt = now;
             sessionRef.set(data);
         });
