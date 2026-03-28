@@ -10,7 +10,6 @@
         body { 
             font-family: 'Arial Black', sans-serif; text-align: center; 
             background-color: #0d0d0d;
-            /* 👇 TU IMAGEN DE IMGUR APLICADA CON TINTE OSCURO 👇 */
             background-image: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.9)), url('https://i.imgur.com/8N4I8nI.png'); 
             background-size: cover; background-position: center; background-attachment: fixed;
             color: white; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-transform: uppercase; box-sizing: border-box; 
@@ -22,10 +21,10 @@
             width: 100%; max-width: 480px; 
         }
         .gta-title-link { text-decoration: none; color: #00d4ff; font-size: 2rem; font-weight: 900; text-shadow: 0 0 10px #00d4ff, 2px 2px 0px #ff00d4; display: block; margin-bottom: 5px; }
-        .main-timer { font-size: 3.8rem; font-weight: bold; margin-top: 15px; color: #ff00d4; font-family: 'Courier New', monospace; text-shadow: 0 0 15px #ff00d4, 0 0 30px #ff00d4; display: inline-block; width: 100%; }
+        .main-timer { font-size: 3.8rem; font-weight: bold; margin: 15px 0; color: #ff00d4; font-family: 'Courier New', monospace; text-shadow: 0 0 15px #ff00d4, 0 0 30px #ff00d4; display: inline-block; width: 100%; }
         .avg-section { margin: 10px 0 20px 0; border-radius: 8px; background: rgba(255, 255, 255, 0.05); padding: 10px; border: 1px solid rgba(255, 0, 212, 0.5); display: none; }
         .avg-label { font-size: 0.7rem; color: #ff00d4; letter-spacing: 4px; font-weight: bold; margin-bottom: 5px;}
-        .avg-time { font-size: 1.6rem; color: #fff; font-family: 'Courier New', monospace; font-weight: bold; text-shadow: 0 0 5px #fff; }
+        .avg-time { font-size: 1.6rem; color: #fff; font-family: 'Courier New', monospace; font-weight: bold; }
         .setup-section { background: #1a1a1a; padding: 15px; margin-bottom: 15px; border: 1px solid #00d4ff; border-radius: 5px;}
         input { background: #000; border: 1px solid #00d4ff; color: #00d4ff; padding: 10px; width: 120px; text-align: center; font-family: 'Arial Black'; font-size: 1.3rem; margin: 5px 0; }
         .stats { display: flex; gap: 15px; margin-bottom: 25px; }
@@ -64,10 +63,11 @@
     const db = firebase.database();
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('sesion') || 'general';
-    const sessionRef = db.ref('audit_v_final_es/' + sessionId);
+    const sessionRef = db.ref('audit_v_pro_es/' + sessionId);
 
     let timerInterval = null;
     function formatTime(ms) { const s = Math.floor(ms / 1000); const h = Math.floor(s / 3600).toString().padStart(2, '0'); const m = Math.floor((s % 3600) / 60).toString().padStart(2, '0'); const sec = (s % 60).toString().padStart(2, '0'); return `${h}:${m}:${sec}`; }
+    function parseTimeToMs(t) { const p = t.split(':'); return ((+p[0]*3600)+(+p[1]*60)+(+p[2]))*1000; }
 
     sessionRef.on('value', (snapshot) => {
         const data = snapshot.val() || { pendientes: 0, completados: 0, startAt: null, avgMs: 0, history: [], locked: false };
@@ -84,10 +84,11 @@
         } else { clearInterval(timerInterval); timerInterval = null; if (data.finishAt) document.getElementById('display').innerText = formatTime(data.finishAt - data.startAt); }
 
         const logHtml = (data.history || []).map(h => {
-            let deltaHtml = h.delta ? `<span style="color:${h.delta.startsWith('-')?'#4caf50':'#f44336'}">(${h.delta})</span>` : "";
+            let deltaHtml = h.delta ? `<span style="color:${h.delta.startsWith('-') ? '#4caf50' : '#f44336'}">(${h.delta})</span>` : "";
             return `<div class="log-entry"><span>${h.action.toUpperCase()} ${h.val || ''} <span style="color:#00d4ff;">${h.lap || ''}</span></span><span>${deltaHtml} <span style="color:#555;">TOT: ${h.split}</span></span></div>`;
         }).join('');
         document.getElementById('log-list').innerHTML = logHtml;
+        document.getElementById('log-list').scrollTop = document.getElementById('log-list').scrollHeight;
     });
 
     document.getElementById('btn-set').onclick = () => {
@@ -104,21 +105,22 @@
             data.pendientes--; data.completados++;
             data.avgMs = Math.floor(totalElapsedMs / data.completados);
             const history = data.history || [];
-            const completionLogs = history.filter(l => l.action === 'completar');
-            const lastTotalMs = completionLogs.length > 0 ? parseTimeToMs(completionLogs[completionLogs.length - 1].split) : 0;
+            const compLogs = history.filter(l => l.action === 'completar');
+            const lastTotalMs = compLogs.length > 0 ? parseTimeToMs(compLogs[compLogs.length - 1].split) : 0;
             const currentLapMs = totalElapsedMs - lastTotalMs;
             let deltaStr = "";
             if (data.completados >= 3) {
-                const prevLapMs = parseTimeToMs(completionLogs[completionLogs.length - 1].split) - (completionLogs[completionLogs.length - 2] ? parseTimeToMs(completionLogs[completionLogs.length - 2].split) : 0);
+                const prevLapMs = parseTimeToMs(compLogs[compLogs.length - 1].split) - (compLogs[compLogs.length - 2] ? parseTimeToMs(compLogs[compLogs.length - 2].split) : 0);
                 const diff = Math.round((currentLapMs - prevLapMs) / 1000);
                 deltaStr = diff <= 0 ? `${diff}s` : `+${diff}s`;
             }
+            if (!data.history) data.history = [];
             data.history.push({ action: "completar", val: data.completados, split: formatTime(totalElapsedMs), lap: formatTime(currentLapMs), delta: deltaStr });
             if (data.pendientes === 0) data.finishAt = now;
             sessionRef.set(data);
         });
     }
-    function parseTimeToMs(t) { const p = t.split(':'); return ((+p[0]*3600)+(+p[1]*60)+(+p[2]))*1000; }
+
     document.getElementById('btn-complete').onclick = completeTask;
     document.addEventListener('keydown', (e) => { if(e.key.toLowerCase()==='g') completeTask(); });
     document.getElementById('btn-reset').onclick = () => { if (prompt(`Escribe "${sessionId}" para reiniciar:`) === sessionId) sessionRef.set({ pendientes: 0, completados: 0, startAt: null, locked: false, history: [] }); };
