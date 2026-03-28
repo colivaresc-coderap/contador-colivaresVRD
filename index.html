@@ -7,58 +7,87 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        body { font-family: 'Arial Black', sans-serif; text-align: center; background: #0d0d0d; color: white; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-transform: uppercase; box-sizing: border-box; }
-        .container { background: rgba(20, 20, 20, 0.98); padding: 20px; border-radius: 5px; box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); width: 100%; max-width: 480px; border: 1px solid #333; }
-        .gta-title-link { text-decoration: none; color: #00d4ff; font-size: 1.8rem; font-weight: 900; text-shadow: 2px 2px 0px #ff00d4; display: block; margin-bottom: 5px; }
-        .session-info { font-size: 0.7rem; color: #555; letter-spacing: 2px; margin-bottom: 10px; display: block; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-        .finished { animation: blink 0.8s infinite; color: #4caf50 !important; border-color: #4caf50 !important; }
-        
-        .main-timer { font-size: 3.5rem; font-weight: bold; margin-top: 10px; color: #ff00d4; font-family: 'Courier New', monospace; text-shadow: 0 0 10px rgba(255, 0, 212, 0.5); display: inline-block; width: 100%; }
-        
-        /* Estilo para el PROMEDIO */
-        .avg-section { margin-bottom: 15px; border-bottom: 2px solid #ff00d4; padding-bottom: 5px; display: none; }
-        .avg-label { font-size: 0.6rem; color: #ff00d4; letter-spacing: 3px; }
-        .avg-time { font-size: 1.2rem; color: #fff; font-family: 'Courier New', monospace; font-weight: bold; }
+        body { 
+            font-family: 'Arial Black', sans-serif; 
+            text-align: center; 
+            background-color: #0d0d0d;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.9)), url('https://i.imgur.com/8N4I8nI.jpg'); 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: white; 
+            margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-transform: uppercase; box-sizing: border-box; 
+        }
 
-        .setup-section { background: #1a1a1a; padding: 15px; margin-bottom: 15px; border: 1px solid #00d4ff; }
-        input { background: #000; border: 1px solid #00d4ff; color: #00d4ff; padding: 10px; width: 100px; text-align: center; font-family: 'Arial Black'; font-size: 1.2rem; margin: 5px 0; }
-        .stats { display: flex; gap: 10px; margin-bottom: 20px; }
-        .box { flex: 1; padding: 15px; border: 1px solid #333; background: rgba(255,255,255,0.05); }
-        .box span { font-size: 0.6rem; color: #888; display: block; margin-bottom: 5px; }
-        .count { font-size: 2.5rem; font-weight: 900; }
-        .btn { padding: 15px; font-size: 1rem; cursor: pointer; border: none; color: white; font-weight: bold; width: 100%; text-transform: uppercase; border: 2px solid; box-shadow: 0 4px 0px rgba(0,0,0,0.5); margin-bottom: 8px; transition: 0.1s; }
-        #btn-complete { background: #2e7d32; border-color: #4caf50; height: 70px; font-size: 1.4rem; }
-        #btn-set { background: #008ba3; border-color: #00d4ff; width: auto; font-size: 0.8rem; }
-        #btn-reset { background: #d32f2f; border-color: #f44336; font-size: 0.7rem; margin-top: 10px; opacity: 0.8; }
-        #btn-undo { background: #455a64; border-color: #607d8b; font-size: 0.8rem; }
-        .log-container { margin-top: 20px; text-align: left; max-height: 180px; overflow-y: auto; background: #000; padding: 10px; border: 1px solid #222; font-family: monospace; font-size: 0.7rem; }
-        .log-entry { padding: 6px 0; border-bottom: 1px solid #111; display: flex; justify-content: space-between; align-items: center; }
+        .container { 
+            background: rgba(10, 10, 10, 0.92); 
+            padding: 25px; 
+            border-radius: 12px; 
+            border: 2px solid rgba(0, 212, 255, 0.6); 
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4), 0 0 40px rgba(0, 212, 255, 0.2); 
+            width: 100%; 
+            max-width: 480px; 
+        }
+
+        .gta-title-link { 
+            text-decoration: none; color: #00d4ff; font-size: 2rem; font-weight: 900; 
+            text-shadow: 0 0 10px #00d4ff, 2px 2px 0px #ff00d4; 
+            display: block; margin-bottom: 5px; 
+        }
+
+        .session-info { font-size: 0.75rem; color: #777; letter-spacing: 3px; margin-bottom: 10px; display: block; }
+
+        .main-timer { 
+            font-size: 3.8rem; font-weight: bold; margin-top: 15px; color: #ff00d4; 
+            font-family: 'Courier New', monospace; 
+            text-shadow: 0 0 15px #ff00d4, 0 0 30px #ff00d4; 
+            display: inline-block; width: 100%; 
+        }
+
+        .avg-section { 
+            margin: 10px 0 20px 0; border-radius: 8px; background: rgba(255, 0, 212, 0.1); 
+            padding: 10px; border: 1px solid rgba(255, 0, 212, 0.4); 
+            display: none; box-shadow: 0 0 15px rgba(255, 0, 212, 0.2);
+        }
+        .avg-label { font-size: 0.7rem; color: #ff00d4; letter-spacing: 4px; font-weight: bold; margin-bottom: 5px;}
+        .avg-time { font-size: 1.4rem; color: #fff; font-family: 'Courier New', monospace; font-weight: bold; }
+
+        .setup-section { background: #1a1a1a; padding: 15px; margin-bottom: 15px; border: 1px solid #00d4ff; border-radius: 5px;}
+        input { background: #000; border: 1px solid #00d4ff; color: #00d4ff; padding: 10px; width: 120px; text-align: center; font-family: 'Arial Black'; font-size: 1.3rem; margin: 5px 0; }
+
+        .stats { display: flex; gap: 15px; margin-bottom: 25px; }
+        .box { flex: 1; padding: 18px; border: 1px solid #333; background: rgba(10, 10, 10, 0.6); border-radius: 8px;}
+        .box span { font-size: 0.7rem; color: #aaa; display: block; margin-bottom: 8px;}
+        .count { font-size: 2.8rem; font-weight: 900; }
+
+        .btn { padding: 18px; font-size: 1.1rem; cursor: pointer; border: none; color: white; font-weight: bold; width: 100%; text-transform: uppercase; border: 2px solid; box-shadow: 0 4px 0px rgba(0,0,0,0.5); margin-bottom: 10px; border-radius: 5px; }
+        #btn-complete { background: #2e7d32; border-color: #4caf50; height: 80px; font-size: 1.5rem; }
+        #btn-reset { background: #d32f2f; border-color: #f44336; font-size: 0.8rem; margin-top: 15px; opacity: 0.8; }
+        #btn-undo { background: #455a64; border-color: #607d8b; font-size: 0.9rem; }
+
+        .log-container { margin-top: 25px; text-align: left; max-height: 200px; overflow-y: auto; background: #000; padding: 15px; border: 1px solid #222; font-family: monospace; font-size: 0.8rem; border-radius: 5px;}
+        .log-entry { padding: 8px 0; border-bottom: 1px solid #111; display: flex; justify-content: space-between; align-items: center; }
         .log-action.completar { color: #4caf50; font-weight: bold; }
         .lap-time { color: #00d4ff; font-weight: bold; margin-left: 5px; }
         .delta-pos { color: #4caf50; font-weight: bold; margin: 0 5px; } 
         .delta-neg { color: #f44336; font-weight: bold; margin: 0 5px; } 
-        .total-time { color: #555; font-size: 0.65rem; }
+        .total-time { color: #555; font-size: 0.75rem; }
     </style>
 </head>
 <body>
 <div class="container">
     <a href="https://discord.gg/CCT4c52RRz" target="_blank" class="gta-title-link">COLIVARESVRD</a>
     <span class="session-info" id="session-display">SALA: GENERAL</span>
-    
     <div class="setup-section" id="setup">
-        <span style="font-size: 0.6rem; color: #aaa;">CANTIDAD INICIAL:</span><br>
         <input type="number" id="input-total" placeholder="0">
-        <button class="btn" id="btn-set">FIJAR Y EMPEZAR</button>
+        <button class="btn" id="btn-set" style="background:#008ba3; border-color:#00d4ff; width:auto; font-size:0.9rem;">FIJAR Y EMPEZAR</button>
     </div>
-
     <div class="main-timer" id="display">00:00:00</div>
-    
     <div class="avg-section" id="avg-display">
         <div class="avg-label">PROMEDIO POR ARTÍCULO</div>
         <div class="avg-time" id="avg-value">00:00:00</div>
     </div>
-
     <div class="stats">
         <div class="box" style="border-left: 5px solid #ff9800;"><span>PENDIENTES</span><div class="count" id="c-pendientes" style="color:#ff9800">0</div></div>
         <div class="box" style="border-left: 5px solid #4caf50;"><span>COMPLETADOS</span><div class="count" id="c-completados" style="color:#4caf50">0</div></div>
@@ -68,34 +97,22 @@
     <button class="btn" id="btn-reset">REINICIAR SALA</button>
     <div class="log-container" id="log-list"></div>
 </div>
-
 <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCcRPE7BCaQVOepkfMFRRDOgTnigcO4218",
-      authDomain: "contador-colivares.firebaseapp.com",
-      projectId: "contador-colivares",
-      databaseURL: "https://contador-colivares-default-rtdb.firebaseio.com",
-      storageBucket: "contador-colivares.firebasestorage.app",
-      appId: "1:774526373630:web:a0f15a1c6727a50b2c1faf"
-    };
+    const firebaseConfig = { apiKey: "AIzaSyCcRPE7BCaQVOepkfMFRRDOgTnigcO4218", authDomain: "contador-colivares.firebaseapp.com", projectId: "contador-colivares", databaseURL: "https://contador-colivares-default-rtdb.firebaseio.com", storageBucket: "contador-colivares.firebasestorage.app", appId: "1:774526373630:web:a0f15a1c6727a50b2c1faf" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('sesion') || 'general';
-    document.getElementById('session-display').innerText = `SALA: ${sessionId.toUpperCase()}`;
-    const sessionRef = db.ref('audit_v_avg_es/' + sessionId);
+    const sessionRef = db.ref('audit_v_pro_es/' + sessionId);
 
     let timerInterval = null;
-
     function formatTime(ms) {
-        if (ms < 0) ms = 0;
         const s = Math.floor(ms / 1000);
         const h = Math.floor(s / 3600).toString().padStart(2, '0');
         const m = Math.floor((s % 3600) / 60).toString().padStart(2, '0');
         const sec = (s % 60).toString().padStart(2, '0');
         return `${h}:${m}:${sec}`;
     }
-
     function parseTimeToMs(timeStr) {
         const parts = timeStr.split(':');
         return ((parseInt(parts[0]) * 3600) + (parseInt(parts[1]) * 60) + parseInt(parts[2])) * 1000;
@@ -106,27 +123,24 @@
         document.getElementById('c-pendientes').innerText = data.pendientes;
         document.getElementById('c-completados').innerText = data.completados;
         document.getElementById('setup').style.display = data.locked ? 'none' : 'block';
+        document.getElementById('avg-display').style.display = data.completados > 0 ? 'block' : 'none';
 
-        if (data.completados > 0) {
-            document.getElementById('avg-display').style.display = 'block';
-        } else {
-            document.getElementById('avg-display').style.display = 'none';
-        }
-
-        const isFinished = data.pendientes === 0 && data.completados > 0;
-        if (isFinished) {
-            document.getElementById('display').classList.add('finished');
-            clearInterval(timerInterval);
-            timerInterval = null;
-            const totalTimeMs = data.finishAt - data.startAt;
-            document.getElementById('display').innerText = formatTime(totalTimeMs);
-            document.getElementById('avg-value').innerText = formatTime(Math.floor(totalTimeMs / data.completados));
-        } else {
-            document.getElementById('display').classList.remove('finished');
-            if (data.startAt) { 
-                if (!timerInterval) startTimer(data.startAt, data.completados); 
-            } else { stopTimer(); }
-        }
+        if (data.startAt) {
+            if (data.pendientes === 0) {
+                clearInterval(timerInterval);
+                const totalMs = data.finishAt - data.startAt;
+                document.getElementById('display').innerText = formatTime(totalMs);
+                document.getElementById('avg-value').innerText = formatTime(Math.floor(totalMs / data.completados));
+            } else {
+                if (!timerInterval) {
+                    timerInterval = setInterval(() => {
+                        const elapsed = Date.now() - data.startAt;
+                        document.getElementById('display').innerText = formatTime(elapsed);
+                        if (data.completados > 0) document.getElementById('avg-value').innerText = formatTime(Math.floor(elapsed / data.completados));
+                    }, 1000);
+                }
+            }
+        } else { clearInterval(timerInterval); timerInterval = null; document.getElementById('display').innerText = "00:00:00"; }
 
         const logHtml = (data.history || []).map(h => {
             let deltaHtml = ""; let lapHtml = h.lap ? `<span class="lap-time">${h.lap}</span>` : "";
@@ -140,56 +154,32 @@
         document.getElementById('log-list').scrollTop = document.getElementById('log-list').scrollHeight;
     });
 
-    function startTimer(start, comps) {
-        if (timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            const now = Date.now();
-            const elapsed = now - start;
-            document.getElementById('display').innerText = formatTime(elapsed);
-            if (comps > 0) {
-                document.getElementById('avg-value').innerText = formatTime(Math.floor(elapsed / comps));
-            }
-        }, 1000);
-    }
-
-    function stopTimer() { clearInterval(timerInterval); timerInterval = null; document.getElementById('display').innerText = "00:00:00"; }
-
     document.getElementById('btn-set').onclick = () => {
         const total = parseInt(document.getElementById('input-total').value);
-        if (total > 0) {
-            sessionRef.set({ pendientes: total, completados: 0, startAt: Date.now(), finishAt: null, totalInicial: total, locked: true, history: [{action: "fijar", val: total, split: "00:00:00"}] });
-        }
+        if (total > 0) sessionRef.set({ pendientes: total, completados: 0, startAt: Date.now(), finishAt: null, totalInicial: total, locked: true, history: [{action: "fijar", val: total, split: "00:00:00"}] });
     };
 
     function completeTask() {
         sessionRef.once('value', (snapshot) => {
             const data = snapshot.val();
-            if (!data || data.pendientes <= 0 || !data.startAt) return;
+            if (!data || data.pendientes <= 0) return;
             const now = Date.now();
             const totalElapsedMs = now - data.startAt;
             const currentSplitStr = formatTime(totalElapsedMs);
             data.pendientes--; data.completados++;
-            
             let deltaStr = ""; let currentLapMs = 0; let lapStr = "";
             const history = data.history || [];
             const completionLogs = history.filter(l => l.action === 'completar');
-            
             if (completionLogs.length > 0) {
                 const lastTotalMs = parseTimeToMs(completionLogs[completionLogs.length - 1].split);
                 currentLapMs = totalElapsedMs - lastTotalMs;
                 lapStr = formatTime(currentLapMs);
-            } else {
-                currentLapMs = totalElapsedMs; lapStr = formatTime(currentLapMs);
-            }
-
-            if (data.completados >= 3) {
-                const lastLog = completionLogs[completionLogs.length - 1];
-                const secondLastLog = completionLogs[completionLogs.length - 2];
-                const lastLapMs = parseTimeToMs(lastLog.split) - (secondLastLog ? parseTimeToMs(secondLastLog.split) : 0);
-                const diffActualS = Math.round((currentLapMs - lastLapMs) / 1000);
-                deltaStr = diffActualS <= 0 ? `${diffActualS}s` : `+${diffActualS}s`;
-            }
-
+                if (data.completados >= 3) {
+                    const lastLapMs = parseTimeToMs(completionLogs[completionLogs.length - 1].split) - (completionLogs[completionLogs.length - 2] ? parseTimeToMs(completionLogs[completionLogs.length - 2].split) : 0);
+                    const diffActualS = Math.round((currentLapMs - lastLapMs) / 1000);
+                    deltaStr = diffActualS <= 0 ? `${diffActualS}s` : `+${diffActualS}s`;
+                }
+            } else { currentLapMs = totalElapsedMs; lapStr = formatTime(currentLapMs); }
             if (!data.history) data.history = [];
             data.history.push({ action: "completar", val: data.completados, split: currentSplitStr, lap: lapStr, delta: deltaStr });
             if (data.pendientes === 0) data.finishAt = now;
@@ -197,26 +187,9 @@
         });
     }
 
-    function undo() {
-        sessionRef.once('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data && data.completados > 0) {
-                data.pendientes++; data.completados--; data.finishAt = null;
-                data.history.push({ action: "deshacer", val: "", split: formatTime(Date.now() - data.startAt) });
-                sessionRef.set(data);
-            }
-        });
-    }
-
-    document.getElementById('btn-reset').onclick = () => {
-        if (prompt(`Escribe "${sessionId}" para reiniciar:`) === sessionId) {
-            sessionRef.set({ pendientes: 0, completados: 0, startAt: null, finishAt: null, locked: false, history: [] });
-        }
-    };
-
     document.getElementById('btn-complete').onclick = completeTask;
-    document.getElementById('btn-undo').onclick = undo;
-    document.addEventListener('keydown', (e) => { if(e.key.toLowerCase()==='g') completeTask(); if(e.key.toLowerCase()==='z') undo(); });
+    document.addEventListener('keydown', (e) => { if(e.key.toLowerCase()==='g') completeTask(); });
+    document.getElementById('btn-reset').onclick = () => { if (prompt(`Escribe "${sessionId}" para reiniciar:`) === sessionId) sessionRef.set({ pendientes: 0, completados: 0, startAt: null, finishAt: null, locked: false, history: [] }); };
 </script>
 </body>
 </html>
