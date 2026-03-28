@@ -9,11 +9,17 @@
     <style>
         body { font-family: 'Arial Black', sans-serif; text-align: center; background: #0d0d0d; color: white; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-transform: uppercase; box-sizing: border-box; }
         .container { background: rgba(20, 20, 20, 0.98); padding: 20px; border-radius: 5px; box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); width: 100%; max-width: 480px; border: 1px solid #333; }
-        .gta-title-link { text-decoration: none; color: #00d4ff; font-size: 1.8rem; font-weight: 900; text-shadow: 2px 2px 0px #ff00d4; display: block; margin-bottom: 5px; transition: 0.3s; }
+        .gta-title-link { text-decoration: none; color: #00d4ff; font-size: 1.8rem; font-weight: 900; text-shadow: 2px 2px 0px #ff00d4; display: block; margin-bottom: 5px; }
         .session-info { font-size: 0.7rem; color: #555; letter-spacing: 2px; margin-bottom: 10px; display: block; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
         .finished { animation: blink 0.8s infinite; color: #4caf50 !important; border-color: #4caf50 !important; }
-        .main-timer { font-size: 3.5rem; font-weight: bold; margin: 10px 0; color: #ff00d4; font-family: 'Courier New', monospace; text-shadow: 0 0 10px rgba(255, 0, 212, 0.5); border-bottom: 2px solid #ff00d4; display: inline-block; width: 100%; }
+        .main-timer { font-size: 3.5rem; font-weight: bold; margin-top: 10px; color: #ff00d4; font-family: 'Courier New', monospace; text-shadow: 0 0 10px rgba(255, 0, 212, 0.5); display: inline-block; width: 100%; }
+        
+        /* AVERAGE STYLING */
+        .avg-section { margin-bottom: 15px; border-bottom: 2px solid #ff00d4; padding-bottom: 5px; display: none; }
+        .avg-label { font-size: 0.6rem; color: #ff00d4; letter-spacing: 3px; }
+        .avg-time { font-size: 1.2rem; color: #fff; font-family: 'Courier New', monospace; font-weight: bold; }
+
         .setup-section { background: #1a1a1a; padding: 15px; margin-bottom: 15px; border: 1px solid #00d4ff; }
         input { background: #000; border: 1px solid #00d4ff; color: #00d4ff; padding: 10px; width: 100px; text-align: center; font-family: 'Arial Black'; font-size: 1.2rem; margin: 5px 0; }
         .stats { display: flex; gap: 10px; margin-bottom: 20px; }
@@ -27,8 +33,7 @@
         #btn-undo { background: #455a64; border-color: #607d8b; font-size: 0.8rem; }
         .log-container { margin-top: 20px; text-align: left; max-height: 180px; overflow-y: auto; background: #000; padding: 10px; border: 1px solid #222; font-family: monospace; font-size: 0.7rem; }
         .log-entry { padding: 6px 0; border-bottom: 1px solid #111; display: flex; justify-content: space-between; align-items: center; }
-        .log-action { font-weight: bold; }
-        .log-action.complete { color: #4caf50; }
+        .log-action.complete { color: #4caf50; font-weight: bold; }
         .lap-time { color: #00d4ff; font-weight: bold; margin-left: 5px; }
         .delta-pos { color: #4caf50; font-weight: bold; margin: 0 5px; } 
         .delta-neg { color: #f44336; font-weight: bold; margin: 0 5px; } 
@@ -39,12 +44,20 @@
 <div class="container">
     <a href="https://discord.gg/CCT4c52RRz" target="_blank" class="gta-title-link">COLIVARESVRD</a>
     <span class="session-info" id="session-display">SESSION: GENERAL</span>
+    
     <div class="setup-section" id="setup">
         <span style="font-size: 0.6rem; color: #aaa;">INITIAL QUANTITY:</span><br>
         <input type="number" id="input-total" placeholder="0">
         <button class="btn" id="btn-set">SET & START</button>
     </div>
+
     <div class="main-timer" id="display">00:00:00</div>
+    
+    <div class="avg-section" id="avg-display">
+        <div class="avg-label">AVERAGE PACE PER ITEM</div>
+        <div class="avg-time" id="avg-value">00:00:00</div>
+    </div>
+
     <div class="stats">
         <div class="box" style="border-left: 5px solid #ff9800;"><span>PENDING</span><div class="count" id="c-pendientes" style="color:#ff9800">0</div></div>
         <div class="box" style="border-left: 5px solid #4caf50;"><span>COMPLETED</span><div class="count" id="c-completados" style="color:#4caf50">0</div></div>
@@ -54,6 +67,7 @@
     <button class="btn" id="btn-reset">RESET SESSION</button>
     <div class="log-container" id="log-list"></div>
 </div>
+
 <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCcRPE7BCaQVOepkfMFRRDOgTnigcO4218",
@@ -68,7 +82,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('sesion') || 'general';
     document.getElementById('session-display').innerText = `SESSION: ${sessionId.toUpperCase()}`;
-    const sessionRef = db.ref('audit_v_precise_en/' + sessionId);
+    const sessionRef = db.ref('audit_v_avg_en/' + sessionId);
 
     let timerInterval = null;
 
@@ -92,15 +106,23 @@
         document.getElementById('c-completados').innerText = data.completados;
         document.getElementById('setup').style.display = data.locked ? 'none' : 'block';
 
+        if (data.completados > 0) {
+            document.getElementById('avg-display').style.display = 'block';
+        } else {
+            document.getElementById('avg-display').style.display = 'none';
+        }
+
         const isFinished = data.pendientes === 0 && data.completados > 0;
         if (isFinished) {
             document.getElementById('display').classList.add('finished');
             clearInterval(timerInterval);
             timerInterval = null;
-            document.getElementById('display').innerText = formatTime(data.finishAt - data.startAt);
+            const totalTimeMs = data.finishAt - data.startAt;
+            document.getElementById('display').innerText = formatTime(totalTimeMs);
+            document.getElementById('avg-value').innerText = formatTime(Math.floor(totalTimeMs / data.completados));
         } else {
             document.getElementById('display').classList.remove('finished');
-            if (data.startAt) { if (!timerInterval) startTimer(data.startAt); } else { stopTimer(); }
+            if (data.startAt) { if (!timerInterval) startTimer(data.startAt, data.completados); } else { stopTimer(); }
         }
 
         const logHtml = (data.history || []).map(h => {
@@ -109,22 +131,21 @@
                 const className = h.delta.startsWith('-') ? 'delta-pos' : 'delta-neg';
                 deltaHtml = `<span class="${className}">(${h.delta})</span>`;
             }
-            return `
-                <div class="log-entry">
-                    <span class="log-action ${h.action}">${h.action.toUpperCase()} ${h.val || ''} ${lapHtml}</span>
-                    <span>${deltaHtml} <span class="total-time">TOT: ${h.split}</span></span>
-                </div>
-            `;
+            return `<div class="log-entry"><span class="log-action ${h.action}">${h.action.toUpperCase()} ${h.val || ''} ${lapHtml}</span><span>${deltaHtml} <span class="total-time">TOT: ${h.split}</span></span></div>`;
         }).join('');
-        const logDiv = document.getElementById('log-list');
-        logDiv.innerHTML = logHtml;
-        logDiv.scrollTop = logDiv.scrollHeight;
+        document.getElementById('log-list').innerHTML = logHtml;
+        document.getElementById('log-list').scrollTop = document.getElementById('log-list').scrollHeight;
     });
 
-    function startTimer(start) {
+    function startTimer(start, comps) {
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
-            document.getElementById('display').innerText = formatTime(Date.now() - start);
+            const now = Date.now();
+            const elapsed = now - start;
+            document.getElementById('display').innerText = formatTime(elapsed);
+            if (comps > 0) {
+                document.getElementById('avg-value').innerText = formatTime(Math.floor(elapsed / comps));
+            }
         }, 1000);
     }
 
@@ -133,16 +154,7 @@
     document.getElementById('btn-set').onclick = () => {
         const total = parseInt(document.getElementById('input-total').value);
         if (total > 0) {
-            const startTime = Date.now();
-            sessionRef.set({ 
-                pendientes: total, 
-                completados: 0, 
-                startAt: startTime, 
-                finishAt: null, 
-                totalInicial: total, 
-                locked: true, 
-                history: [{action: "set", val: total, split: "00:00:00"}] 
-            });
+            sessionRef.set({ pendientes: total, completados: 0, startAt: Date.now(), finishAt: null, totalInicial: total, locked: true, history: [{action: "set", val: total, split: "00:00:00"}] });
         }
     };
 
@@ -170,10 +182,8 @@
             if (data.completados >= 3) {
                 const lastLog = completionLogs[completionLogs.length - 1];
                 const secondLastLog = completionLogs[completionLogs.length - 2];
-                const lastTotalMs = parseTimeToMs(lastLog.split);
-                const secondLastTotalMs = secondLastLog ? parseTimeToMs(secondLastLog.split) : 0;
-                const prevLapMs = lastTotalMs - secondLastTotalMs;
-                const diffActualS = Math.round((currentLapMs - prevLapMs) / 1000);
+                const lastLapMs = parseTimeToMs(lastLog.split) - (secondLastLog ? parseTimeToMs(secondLastLog.split) : 0);
+                const diffActualS = Math.round((currentLapMs - lastLapMs) / 1000);
                 deltaStr = diffActualS <= 0 ? `${diffActualS}s` : `+${diffActualS}s`;
             }
 
