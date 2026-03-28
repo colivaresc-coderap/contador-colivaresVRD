@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>COLIVARESVRD | DISCORD AUTO-REPORT</title>
+    <title>COLIVARESVRD | CONTROL FINAL</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
         body { font-family: 'Arial Black', sans-serif; text-align: center; background: #0d0d0d; color: white; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-transform: uppercase; box-sizing: border-box; }
         .container { background: rgba(20, 20, 20, 0.98); padding: 20px; border-radius: 5px; box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); width: 100%; max-width: 450px; border: 1px solid #333; }
-        .gta-title { color: #00d4ff; font-size: 1.8rem; font-weight: 900; text-shadow: 2px 2px 0px #ff00d4; margin-bottom: 5px; display: block; }
+        .gta-title-link { text-decoration: none; color: #00d4ff; font-size: 1.8rem; font-weight: 900; text-shadow: 2px 2px 0px #ff00d4; display: block; margin-bottom: 5px; transition: 0.3s; }
+        .gta-title-link:hover { color: #ff00d4; text-shadow: 2px 2px 0px #00d4ff; }
         .session-info { font-size: 0.7rem; color: #555; letter-spacing: 2px; margin-bottom: 10px; display: block; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
         .finished { animation: blink 0.8s infinite; color: #4caf50 !important; border-color: #4caf50 !important; }
@@ -32,12 +33,13 @@
         .log-action.fijar { color: #00d4ff; }
         .log-action.completar { color: #4caf50; }
         .log-action.deshacer { color: #f44336; }
+        .log-split { color: #aaa; font-style: italic; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <span class="gta-title">COLIVARESVRD</span>
+    <a href="https://discord.gg/CCT4c52RRz" target="_blank" class="gta-title-link">COLIVARESVRD</a>
     <span class="session-info" id="session-display">SALA: GENERAL</span>
     
     <div class="setup-section" id="setup">
@@ -61,6 +63,7 @@
 </div>
 
 <script>
+    // --- MANTENER FIREBASE IGUAL (USANDO TU KEY EXISTENTE) ---
     const firebaseConfig = {
       apiKey: "AIzaSyCcRPE7BCaQVOepkfMFRRDOgTnigcO4218",
       authDomain: "contador-colivares.firebaseapp.com",
@@ -75,18 +78,17 @@
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('sesion') || 'general';
     document.getElementById('session-display').innerText = `SALA: ${sessionId.toUpperCase()}`;
-    const sessionRef = db.ref('audit_v3/' + sessionId);
+    const sessionRef = db.ref('audit_vfinal_es/' + sessionId); // Nueva ruta para datos limpios
 
     let timerInterval = null;
 
-  // --- FUNCIÓN PARA DISCORD CON MENCIÓN @EVERYONE ---
+    // Discord Webhook (Mismo webhook)
     function enviarADiscord(sesion, inicial, tiempo) {
         const WEBHOOK_URL = "https://discord.com/api/webhooks/1487229496166842508/E7ao4Z0VempUpkaAnKdYawDi16sRQKctk0N7N40owyFUp8bGayeXFYf81yuKoP83_KHM"; 
-        
         const payload = {
             username: "ColivaresVRD",
             avatar_url: "https://i.imgur.com/vHq7FhY.png",
-            content: "@everyone 🚨 **¡MISIÓN FINALIZADA!** 🚨", // <--- Esto activa la notificación a todos
+            content: "@everyone 🚨 **¡MISIÓN FINALIZADA!** 🚨",
             embeds: [{
                 title: "✅ REPORTE DE SESIÓN COMPLETADO",
                 color: 3066993, 
@@ -98,12 +100,7 @@
                 footer: { text: "ColivaresVRD System | " + new Date().toLocaleString() }
             }]
         };
-
-        fetch(WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
+        fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     }
 
     sessionRef.on('value', (snapshot) => {
@@ -114,7 +111,6 @@
         document.getElementById('setup').style.display = data.locked ? 'none' : 'block';
 
         const isFinished = data.pendientes === 0 && data.completados > 0;
-        
         if (isFinished) {
             document.getElementById('display').classList.add('finished');
             document.getElementById('btn-complete').disabled = true;
@@ -122,7 +118,6 @@
             timerInterval = null;
             const finalTime = formatTime(data.finishAt - data.startAt);
             document.getElementById('display').innerText = finalTime;
-
             if (!data.reportSent) {
                 enviarADiscord(sessionId, data.totalInicial, finalTime);
                 sessionRef.update({ reportSent: true });
@@ -133,10 +128,11 @@
             if (data.startAt) { if (!timerInterval) startTimer(data.startAt); } else { stopTimer(); }
         }
 
+        // Renderizado del Historial con Tiempo de Split
         const logHtml = (data.history || []).map(h => `
             <div class="log-entry">
                 <span class="log-action ${h.action.toLowerCase()}">${h.action.toUpperCase()}: ${h.val || ''}</span>
-                <span class="log-time">${h.time}</span>
+                <span class="log-split">⏱️ ${h.split}</span>
             </div>
         `).join('');
         const logDiv = document.getElementById('log-list');
@@ -167,10 +163,15 @@
         document.getElementById('display').innerText = "00:00:00";
     }
 
+    function calculateSplit(startAt) {
+        if (!startAt) return "00:00:00";
+        return formatTime(Date.now() - startAt);
+    }
+
     document.getElementById('btn-set').onclick = () => {
         const total = parseInt(document.getElementById('input-total').value);
         if (total > 0) {
-            sessionRef.set({ pendientes: total, completados: 0, startAt: null, finishAt: null, totalInicial: total, locked: true, history: [{action: "fijar", val: total, time: new Date().toLocaleTimeString()}], reportSent: false });
+            sessionRef.set({ pendientes: total, completados: 0, startAt: null, finishAt: null, totalInicial: total, locked: true, history: [{action: "fijar", val: total, split: "START"}], reportSent: false });
         }
     };
 
@@ -178,11 +179,17 @@
         sessionRef.once('value', (snapshot) => {
             const data = snapshot.val();
             if (data && data.pendientes > 0) {
-                if (!data.startAt) data.startAt = Date.now();
+                let currentSplit = "";
+                if (!data.startAt) {
+                    data.startAt = Date.now();
+                    currentSplit = "00:00:00";
+                } else {
+                    currentSplit = calculateSplit(data.startAt);
+                }
                 data.pendientes--;
                 data.completados++;
                 if (!data.history) data.history = [];
-                data.history.push({ action: "completar", val: data.completados, time: new Date().toLocaleTimeString() });
+                data.history.push({ action: "completar", val: data.completados, split: currentSplit });
                 if (data.pendientes === 0) data.finishAt = Date.now();
                 sessionRef.set(data);
             }
@@ -193,11 +200,12 @@
         sessionRef.once('value', (snapshot) => {
             const data = snapshot.val();
             if (data && data.completados > 0) {
+                const currentSplit = calculateSplit(data.startAt);
                 data.pendientes++;
                 data.completados--;
                 data.finishAt = null;
                 data.reportSent = false;
-                data.history.push({ action: "deshacer", val: "", time: new Date().toLocaleTimeString() });
+                data.history.push({ action: "deshacer", val: "", split: currentSplit });
                 if (data.completados === 0) data.startAt = null;
                 sessionRef.set(data);
             }
