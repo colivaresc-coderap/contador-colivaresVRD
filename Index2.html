@@ -14,79 +14,50 @@
             background-size: cover; background-position: center; background-attachment: fixed;
             color: white; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-transform: uppercase; box-sizing: border-box; 
         }
-
         .container { 
             background: rgba(10, 10, 10, 0.92); padding: 25px; border-radius: 12px; 
             border: 2px solid rgba(0, 212, 255, 0.6); 
             box-shadow: 0 0 20px rgba(0, 212, 255, 0.4), 0 0 40px rgba(0, 212, 255, 0.2); 
             width: 100%; max-width: 480px; 
         }
-
-        .gta-title-link { 
-            text-decoration: none; color: #00d4ff; font-size: 2rem; font-weight: 900; 
-            text-shadow: 0 0 10px #00d4ff, 2px 2px 0px #ff00d4; 
-            display: block; margin-bottom: 5px; 
-        }
-
-        .session-info { font-size: 0.75rem; color: #777; letter-spacing: 3px; margin-bottom: 10px; display: block; }
-
-        .main-timer { 
-            font-size: 3.8rem; font-weight: bold; margin-top: 15px; color: #ff00d4; 
-            font-family: 'Courier New', monospace; 
-            text-shadow: 0 0 15px #ff00d4, 0 0 30px #ff00d4; 
-            display: inline-block; width: 100%; 
-        }
-
-        .avg-section { 
-            margin: 10px 0 20px 0; border-radius: 8px; background: rgba(255, 0, 212, 0.1); 
-            padding: 10px; border: 1px solid rgba(255, 0, 212, 0.4); 
-            display: none; box-shadow: 0 0 15px rgba(255, 0, 212, 0.2);
-        }
+        .gta-title-link { text-decoration: none; color: #00d4ff; font-size: 2rem; font-weight: 900; text-shadow: 0 0 10px #00d4ff, 2px 2px 0px #ff00d4; display: block; margin-bottom: 5px; }
+        .main-timer { font-size: 3.8rem; font-weight: bold; margin-top: 15px; color: #ff00d4; font-family: 'Courier New', monospace; text-shadow: 0 0 15px #ff00d4, 0 0 30px #ff00d4; display: inline-block; width: 100%; }
+        .avg-section { margin: 10px 0 20px 0; border-radius: 8px; background: rgba(255, 0, 212, 0.1); padding: 10px; border: 1px solid rgba(255, 0, 212, 0.4); box-shadow: 0 0 15px rgba(255, 0, 212, 0.2); }
         .avg-label { font-size: 0.7rem; color: #ff00d4; letter-spacing: 4px; font-weight: bold; margin-bottom: 5px;}
         .avg-time { font-size: 1.4rem; color: #fff; font-family: 'Courier New', monospace; font-weight: bold; }
-
         .setup-section { background: #1a1a1a; padding: 15px; margin-bottom: 15px; border: 1px solid #00d4ff; border-radius: 5px;}
         input { background: #000; border: 1px solid #00d4ff; color: #00d4ff; padding: 10px; width: 120px; text-align: center; font-family: 'Arial Black'; font-size: 1.3rem; margin: 5px 0; }
-
         .stats { display: flex; gap: 15px; margin-bottom: 25px; }
         .box { flex: 1; padding: 18px; border: 1px solid #333; background: rgba(10, 10, 10, 0.6); border-radius: 8px;}
-        .box span { font-size: 0.7rem; color: #aaa; display: block; margin-bottom: 8px;}
         .count { font-size: 2.8rem; font-weight: 900; }
-
         .btn { padding: 18px; font-size: 1.1rem; cursor: pointer; border: none; color: white; font-weight: bold; width: 100%; text-transform: uppercase; border: 2px solid; box-shadow: 0 4px 0px rgba(0,0,0,0.5); margin-bottom: 10px; border-radius: 5px; }
         #btn-complete { background: #2e7d32; border-color: #4caf50; height: 80px; font-size: 1.5rem; }
-        #btn-reset { background: #d32f2f; border-color: #f44336; font-size: 0.8rem; margin-top: 15px; opacity: 0.8; }
-        #btn-undo { background: #455a64; border-color: #607d8b; font-size: 0.9rem; }
-
         .log-container { margin-top: 25px; text-align: left; max-height: 200px; overflow-y: auto; background: #000; padding: 15px; border: 1px solid #222; font-family: monospace; font-size: 0.8rem; border-radius: 5px;}
         .log-entry { padding: 8px 0; border-bottom: 1px solid #111; display: flex; justify-content: space-between; align-items: center; }
-        .log-action.complete { color: #4caf50; font-weight: bold; }
         .lap-time { color: #00d4ff; font-weight: bold; margin-left: 5px; }
         .delta-pos { color: #4caf50; font-weight: bold; margin: 0 5px; } 
         .delta-neg { color: #f44336; font-weight: bold; margin: 0 5px; } 
-        .total-time { color: #555; font-size: 0.75rem; }
     </style>
 </head>
 <body>
 <div class="container">
     <a href="https://discord.gg/CCT4c52RRz" target="_blank" class="gta-title-link">COLIVARESVRD</a>
-    <span class="session-info" id="session-display">SESSION: GENERAL</span>
     <div class="setup-section" id="setup">
         <input type="number" id="input-total" placeholder="0">
         <button class="btn" id="btn-set" style="background:#008ba3; border-color:#00d4ff; width:auto; font-size:0.9rem;">SET & START</button>
     </div>
     <div class="main-timer" id="display">00:00:00</div>
-    <div class="avg-section" id="avg-display">
+    <div class="avg-section" id="avg-display" style="display:none;">
         <div class="avg-label">AVERAGE PACE PER ITEM</div>
         <div class="avg-time" id="avg-value">00:00:00</div>
     </div>
     <div class="stats">
-        <div class="box" style="border-left: 5px solid #ff9800;"><span>PENDING</span><div class="count" id="c-pendientes" style="color:#ff9800">0</div></div>
-        <div class="box" style="border-left: 5px solid #4caf50;"><span>COMPLETED</span><div class="count" id="c-completados" style="color:#4caf50">0</div></div>
+        <div class="box" style="border-left: 5px solid #ff9800;"><span style="font-size:0.7rem; color:#aaa;">PENDING</span><div class="count" id="c-pendientes" style="color:#ff9800">0</div></div>
+        <div class="box" style="border-left: 5px solid #4caf50;"><span style="font-size:0.7rem; color:#aaa;">COMPLETED</span><div class="count" id="c-completados" style="color:#4caf50">0</div></div>
     </div>
     <button class="btn" id="btn-complete">COMPLETE (G)</button>
-    <button class="btn" id="btn-undo">UNDO (Z)</button>
-    <button class="btn" id="btn-reset">RESET SESSION</button>
+    <button class="btn" id="btn-undo" style="background:#455a64; border-color:#607d8b; font-size:0.9rem;">UNDO (Z)</button>
+    <button class="btn" id="btn-reset" style="background:#d32f2f; border-color:#f44336; font-size:0.8rem; margin-top:15px; opacity:0.8;">RESET SESSION</button>
     <div class="log-container" id="log-list"></div>
 </div>
 <script>
@@ -95,27 +66,17 @@
     const db = firebase.database();
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('sesion') || 'general';
-    const sessionRef = db.ref('audit_v_pro_en/' + sessionId);
+    const sessionRef = db.ref('audit_v_avg_en/' + sessionId);
 
     let timerInterval = null;
-    function formatTime(ms) {
-        const s = Math.floor(ms / 1000);
-        const h = Math.floor(s / 3600).toString().padStart(2, '0');
-        const m = Math.floor((s % 3600) / 60).toString().padStart(2, '0');
-        const sec = (s % 60).toString().padStart(2, '0');
-        return `${h}:${m}:${sec}`;
-    }
-    function parseTimeToMs(timeStr) {
-        const parts = timeStr.split(':');
-        return ((parseInt(parts[0]) * 3600) + (parseInt(parts[1]) * 60) + parseInt(parts[2])) * 1000;
-    }
+    function formatTime(ms) { const s = Math.floor(ms / 1000); const h = Math.floor(s / 3600).toString().padStart(2, '0'); const m = Math.floor((s % 3600) / 60).toString().padStart(2, '0'); const sec = (s % 60).toString().padStart(2, '0'); return `${h}:${m}:${sec}`; }
 
     sessionRef.on('value', (snapshot) => {
-        const data = snapshot.val() || { pendientes: 0, completados: 0, startAt: null, finishAt: null, totalInicial: 0, history: [], locked: false };
+        const data = snapshot.val() || { pendientes: 0, completados: 0, startAt: null, history: [], locked: false };
         document.getElementById('c-pendientes').innerText = data.pendientes;
         document.getElementById('c-completados').innerText = data.completados;
         document.getElementById('setup').style.display = data.locked ? 'none' : 'block';
-        document.getElementById('avg-display').style.display = data.completados > 0 ? 'block' : 'none';
+        document.getElementById('avg-display').style.display = data.locked ? 'block' : 'none';
 
         if (data.startAt) {
             if (data.pendientes === 0) {
@@ -128,19 +89,15 @@
                     timerInterval = setInterval(() => {
                         const elapsed = Date.now() - data.startAt;
                         document.getElementById('display').innerText = formatTime(elapsed);
-                        if (data.completados > 0) document.getElementById('avg-value').innerText = formatTime(Math.floor(elapsed / data.completados));
+                        const divisor = data.completados > 0 ? data.completados : 1; 
+                        document.getElementById('avg-value').innerText = formatTime(Math.floor(elapsed / divisor));
                     }, 1000);
                 }
             }
         } else { clearInterval(timerInterval); timerInterval = null; document.getElementById('display').innerText = "00:00:00"; }
-
         const logHtml = (data.history || []).map(h => {
-            let deltaHtml = ""; let lapHtml = h.lap ? `<span class="lap-time">${h.lap}</span>` : "";
-            if (h.delta) {
-                const className = h.delta.startsWith('-') ? 'delta-pos' : 'delta-neg';
-                deltaHtml = `<span class="${className}">(${h.delta})</span>`;
-            }
-            return `<div class="log-entry"><span class="log-action ${h.action}">${h.action.toUpperCase()} ${h.val || ''} ${lapHtml}</span><span>${deltaHtml} <span class="total-time">TOT: ${h.split}</span></span></div>`;
+            let deltaHtml = h.delta ? `<span class="${h.delta.startsWith('-') ? 'delta-pos' : 'delta-neg'}">(${h.delta})</span>` : "";
+            return `<div class="log-entry"><span class="log-action ${h.action}">${h.action.toUpperCase()} ${h.val || ''} <span class="lap-time">${h.lap || ''}</span></span><span>${deltaHtml} <span style="color:#555; font-size:0.75rem;">TOT: ${h.split}</span></span></div>`;
         }).join('');
         document.getElementById('log-list').innerHTML = logHtml;
         document.getElementById('log-list').scrollTop = document.getElementById('log-list').scrollHeight;
@@ -157,31 +114,26 @@
             if (!data || data.pendientes <= 0) return;
             const now = Date.now();
             const totalElapsedMs = now - data.startAt;
-            const currentSplitStr = formatTime(totalElapsedMs);
             data.pendientes--; data.completados++;
-            let deltaStr = ""; let currentLapMs = 0; let lapStr = "";
             const history = data.history || [];
             const completionLogs = history.filter(l => l.action === 'complete');
-            if (completionLogs.length > 0) {
-                const lastTotalMs = parseTimeToMs(completionLogs[completionLogs.length - 1].split);
-                currentLapMs = totalElapsedMs - lastTotalMs;
-                lapStr = formatTime(currentLapMs);
-                if (data.completados >= 3) {
-                    const lastLapMs = parseTimeToMs(completionLogs[completionLogs.length - 1].split) - (completionLogs[completionLogs.length - 2] ? parseTimeToMs(completionLogs[completionLogs.length - 2].split) : 0);
-                    const diffActualS = Math.round((currentLapMs - lastLapMs) / 1000);
-                    deltaStr = diffActualS <= 0 ? `${diffActualS}s` : `+${diffActualS}s`;
-                }
-            } else { currentLapMs = totalElapsedMs; lapStr = formatTime(currentLapMs); }
-            if (!data.history) data.history = [];
-            data.history.push({ action: "complete", val: data.completados, split: currentSplitStr, lap: lapStr, delta: deltaStr });
+            const lastTotalMs = completionLogs.length > 0 ? parseTimeToMs(completionLogs[completionLogs.length - 1].split) : 0;
+            const currentLapMs = totalElapsedMs - lastTotalMs;
+            let deltaStr = "";
+            if (data.completados >= 3) {
+                const prevLapMs = parseTimeToMs(completionLogs[completionLogs.length - 1].split) - (completionLogs[completionLogs.length - 2] ? parseTimeToMs(completionLogs[completionLogs.length - 2].split) : 0);
+                const diff = Math.round((currentLapMs - prevLapMs) / 1000);
+                deltaStr = diff <= 0 ? `${diff}s` : `+${diff}s`;
+            }
+            data.history.push({ action: "complete", val: data.completados, split: formatTime(totalElapsedMs), lap: formatTime(currentLapMs), delta: deltaStr });
             if (data.pendientes === 0) data.finishAt = now;
             sessionRef.set(data);
         });
     }
-
+    function parseTimeToMs(t) { const p = t.split(':'); return ((+p[0]*3600)+(+p[1]*60)+(+p[2]))*1000; }
     document.getElementById('btn-complete').onclick = completeTask;
     document.addEventListener('keydown', (e) => { if(e.key.toLowerCase()==='g') completeTask(); });
-    document.getElementById('btn-reset').onclick = () => { if (prompt(`Type "${sessionId}" to reset:`) === sessionId) sessionRef.set({ pendientes: 0, completados: 0, startAt: null, finishAt: null, locked: false, history: [] }); };
+    document.getElementById('btn-reset').onclick = () => { if (prompt(`Type "${sessionId}" to reset:`) === sessionId) sessionRef.set({ pendientes: 0, completados: 0, startAt: null, locked: false, history: [] }); };
 </script>
 </body>
 </html>
