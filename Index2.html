@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>COLIVARESVRD | DISCORD AUTO-REPORT (EN)</title>
+    <title>COLIVARESVRD | FINAL CONTROL (EN)</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
         body { font-family: 'Arial Black', sans-serif; text-align: center; background: #0d0d0d; color: white; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-transform: uppercase; box-sizing: border-box; }
         .container { background: rgba(20, 20, 20, 0.98); padding: 20px; border-radius: 5px; box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); width: 100%; max-width: 450px; border: 1px solid #333; }
-        
-        /* Título con Hipervínculo Estilo GTA */
         .gta-title-link { text-decoration: none; color: #00d4ff; font-size: 1.8rem; font-weight: 900; text-shadow: 2px 2px 0px #ff00d4; display: block; margin-bottom: 5px; transition: 0.3s; }
         .gta-title-link:hover { color: #ff00d4; text-shadow: 2px 2px 0px #00d4ff; }
-        
         .session-info { font-size: 0.7rem; color: #555; letter-spacing: 2px; margin-bottom: 10px; display: block; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
         .finished { animation: blink 0.8s infinite; color: #4caf50 !important; border-color: #4caf50 !important; }
@@ -36,6 +33,7 @@
         .log-action.set { color: #00d4ff; }
         .log-action.complete { color: #4caf50; }
         .log-action.undo { color: #f44336; }
+        .log-split { color: #aaa; font-style: italic; }
     </style>
 </head>
 <body>
@@ -79,13 +77,12 @@
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('sesion') || 'general';
     document.getElementById('session-display').innerText = `SESSION: ${sessionId.toUpperCase()}`;
-    const sessionRef = db.ref('audit_en_v1/' + sessionId);
+    const sessionRef = db.ref('audit_vfinal_en/' + sessionId); // Nueva ruta para datos limpios
 
     let timerInterval = null;
 
     function enviarADiscord(sesion, inicial, tiempo) {
         const WEBHOOK_URL = "https://discord.com/api/webhooks/1487229496166842508/E7ao4Z0VempUpkaAnKdYawDi16sRQKctk0N7N40owyFUp8bGayeXFYf81yuKoP83_KHM"; 
-        
         const payload = {
             username: "ColivaresVRD",
             avatar_url: "https://i.imgur.com/vHq7FhY.png",
@@ -101,7 +98,6 @@
                 footer: { text: "ColivaresVRD System | " + new Date().toLocaleString() }
             }]
         };
-
         fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     }
 
@@ -132,7 +128,7 @@
         const logHtml = (data.history || []).map(h => `
             <div class="log-entry">
                 <span class="log-action ${h.action.toLowerCase()}">${h.action.toUpperCase()}: ${h.val || ''}</span>
-                <span class="log-time">${h.time}</span>
+                <span class="log-split">⏱️ ${h.split}</span>
             </div>
         `).join('');
         const logDiv = document.getElementById('log-list');
@@ -163,10 +159,15 @@
         document.getElementById('display').innerText = "00:00:00";
     }
 
+    function calculateSplit(startAt) {
+        if (!startAt) return "00:00:00";
+        return formatTime(Date.now() - startAt);
+    }
+
     document.getElementById('btn-set').onclick = () => {
         const total = parseInt(document.getElementById('input-total').value);
         if (total > 0) {
-            sessionRef.set({ pendientes: total, completados: 0, startAt: null, finishAt: null, totalInicial: total, locked: true, history: [{action: "set", val: total, time: new Date().toLocaleTimeString()}], reportSent: false });
+            sessionRef.set({ pendientes: total, completados: 0, startAt: null, finishAt: null, totalInicial: total, locked: true, history: [{action: "set", val: total, split: "START"}], reportSent: false });
         }
     };
 
@@ -174,11 +175,17 @@
         sessionRef.once('value', (snapshot) => {
             const data = snapshot.val();
             if (data && data.pendientes > 0) {
-                if (!data.startAt) data.startAt = Date.now();
+                let currentSplit = "";
+                if (!data.startAt) {
+                    data.startAt = Date.now();
+                    currentSplit = "00:00:00";
+                } else {
+                    currentSplit = calculateSplit(data.startAt);
+                }
                 data.pendientes--;
                 data.completados++;
                 if (!data.history) data.history = [];
-                data.history.push({ action: "complete", val: data.completados, time: new Date().toLocaleTimeString() });
+                data.history.push({ action: "complete", val: data.completados, split: currentSplit });
                 if (data.pendientes === 0) data.finishAt = Date.now();
                 sessionRef.set(data);
             }
@@ -189,11 +196,12 @@
         sessionRef.once('value', (snapshot) => {
             const data = snapshot.val();
             if (data && data.completados > 0) {
+                const currentSplit = calculateSplit(data.startAt);
                 data.pendientes++;
                 data.completados--;
                 data.finishAt = null;
                 data.reportSent = false;
-                data.history.push({ action: "undo", val: "", time: new Date().toLocaleTimeString() });
+                data.history.push({ action: "undo", val: "", split: currentSplit });
                 if (data.completados === 0) data.startAt = null;
                 sessionRef.set(data);
             }
@@ -207,7 +215,7 @@
     };
 
     document.getElementById('btn-complete').onclick = completeTask;
-    document.getElementById('btn-undo').onclick = undo;
+    document.getElementById('btn-undo').undo = undo;
     document.addEventListener('keydown', (e) => {
         if(e.key.toLowerCase()==='g') completeTask();
         if(e.key.toLowerCase()==='z') undo();
