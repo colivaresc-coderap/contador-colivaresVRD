@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>COLIVARESVRD | DISCORD AUTO-REPORT (EN)</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: 'Arial Black', sans-serif; text-align: center; background: #0d0d0d; color: white; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-transform: uppercase; box-sizing: border-box; }
+        .container { background: rgba(20, 20, 20, 0.98); padding: 20px; border-radius: 5px; box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); width: 100%; max-width: 450px; border: 1px solid #333; }
+        .gta-title { color: #00d4ff; font-size: 1.8rem; font-weight: 900; text-shadow: 2px 2px 0px #ff00d4; margin-bottom: 5px; display: block; }
+        .session-info { font-size: 0.7rem; color: #555; letter-spacing: 2px; margin-bottom: 10px; display: block; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .finished { animation: blink 0.8s infinite; color: #4caf50 !important; border-color: #4caf50 !important; }
+        .main-timer { font-size: 3.5rem; font-weight: bold; margin: 10px 0; color: #ff00d4; font-family: 'Courier New', monospace; text-shadow: 0 0 10px rgba(255, 0, 212, 0.5); border-bottom: 2px solid #ff00d4; display: inline-block; width: 100%; }
+        .setup-section { background: #1a1a1a; padding: 15px; margin-bottom: 15px; border: 1px solid #00d4ff; }
+        input { background: #000; border: 1px solid #00d4ff; color: #00d4ff; padding: 10px; width: 100px; text-align: center; font-family: 'Arial Black'; font-size: 1.2rem; margin: 5px 0; }
+        .stats { display: flex; gap: 10px; margin-bottom: 20px; }
+        .box { flex: 1; padding: 15px; border: 1px solid #333; background: rgba(255,255,255,0.05); }
+        .box span { font-size: 0.6rem; color: #888; display: block; margin-bottom: 5px; }
+        .count { font-size: 2.5rem; font-weight: 900; }
+        .btn { padding: 15px; font-size: 1rem; cursor: pointer; border: none; color: white; font-weight: bold; width: 100%; text-transform: uppercase; border: 2px solid; box-shadow: 0 4px 0px rgba(0,0,0,0.5); margin-bottom: 8px; transition: 0.1s; }
+        #btn-complete { background: #2e7d32; border-color: #4caf50; height: 70px; font-size: 1.3rem; }
+        #btn-set { background: #008ba3; border-color: #00d4ff; width: auto; font-size: 0.8rem; }
+        #btn-reset { background: #d32f2f; border-color: #f44336; font-size: 0.7rem; margin-top: 10px; opacity: 0.8; }
+        #btn-undo { background: #455a64; border-color: #607d8b; font-size: 0.8rem; }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+        .btn:disabled { background: #1a1a1a; border-color: #333; color: #444; cursor: not-allowed; transform: none; box-shadow: none; }
+        .log-container { margin-top: 20px; text-align: left; max-height: 120px; overflow-y: auto; background: #000; padding: 10px; border: 1px solid #222; font-family: monospace; font-size: 0.75rem; }
+        .log-entry { padding: 5px 0; border-bottom: 1px solid #111; display: flex; justify-content: space-between; }
+        .log-action.set { color: #00d4ff; }
+        .log-action.complete { color: #4caf50; }
+        .log-action.undo { color: #f44336; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <span class="gta-title">COLIVARESVRD</span>
+    <span class="session-info" id="session-display">SESSION: GENERAL</span>
+    
+    <div class="setup-section" id="setup">
+        <span style="font-size: 0.6rem; color: #aaa;">INITIAL QUANTITY:</span><br>
+        <input type="number" id="input-total" placeholder="0">
+        <button class="btn" id="btn-set">SET & START</button>
+    </div>
+
+    <div class="main-timer" id="display">00:00:00</div>
+
+    <div class="stats">
+        <div class="box" style="border-left: 5px solid #ff9800;"><span>PENDING</span><div class="count" id="c-pendientes" style="color:#ff9800">0</div></div>
+        <div class="box" style="border-left: 5px solid #4caf50;"><span>COMPLETED</span><div class="count" id="c-completados" style="color:#4caf50">0</div></div>
+    </div>
+
+    <button class="btn" id="btn-complete">COMPLETE (G)</button>
+    <button class="btn" id="btn-undo">UNDO (Z)</button>
+    <button class="btn" id="btn-reset">RESET SESSION</button>
+
+    <div class="log-container" id="log-list"></div>
+</div>
+
+<script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCcRPE7BCaQVOepkfMFRRDOgTnigcO4218",
+      authDomain: "contador-colivares.firebaseapp.com",
+      projectId: "contador-colivares",
+      databaseURL: "https://contador-colivares-default-rtdb.firebaseio.com",
+      storageBucket: "contador-colivares.firebasestorage.app",
+      appId: "1:774526373630:web:a0f15a1c6727a50b2c1faf"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('sesion') || 'general';
+    document.getElementById('session-display').innerText = `SESSION: ${sessionId.toUpperCase()}`;
+    const sessionRef = db.ref('audit_en_v1/' + sessionId);
+
+    let timerInterval = null;
+
+    function enviarADiscord(sesion, inicial, tiempo) {
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1487229496166842508/E7ao4Z0VempUpkaAnKdYawDi16sRQKctk0N7N40owyFUp8bGayeXFYf81yuKoP83_KHM"; 
+        
+        const payload = {
+            username: "ColivaresVRD",
+            avatar_url: "https://i.imgur.com/vHq7FhY.png",
+            content: "@everyone 🚨 **MISSION ACCOMPLISHED!** 🚨",
+            embeds: [{
+                title: "✅ SESSION REPORT COMPLETED",
+                color: 3066993, 
+                fields: [
+                    { name: "📍 Session", value: `\`${sesion.toUpperCase()}\``, inline: true },
+                    { name: "📦 Initial Qty", value: `\`${inicial}\``, inline: true },
+                    { name: "⏱️ Total Time", value: `\`${tiempo}\``, inline: true }
+                ],
+                footer: { text: "ColivaresVRD System | " + new Date().toLocaleString() }
+            }]
+        };
+
+        fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    }
+
+    sessionRef.on('value', (snapshot) => {
+        const data = snapshot.val() || { pendientes: 0, completados: 0, startAt: null, finishAt: null, totalInicial: 0, history: [], locked: false, reportSent: false };
+        document.getElementById('c-pendientes').innerText = data.pendientes;
+        document.getElementById('c-completados').innerText = data.completados;
+        document.getElementById('setup').style.display = data.locked ? 'none' : 'block';
+
+        const isFinished = data.pendientes === 0 && data.completados > 0;
+        if (isFinished) {
+            document.getElementById('display').classList.add('finished');
+            document.getElementById('btn-complete').disabled = true;
+            clearInterval(timerInterval);
+            timerInterval = null;
+            const finalTime = formatTime(data.finishAt - data.startAt);
+            document.getElementById('display').innerText = finalTime;
+            if (!data.reportSent) {
+                enviarADiscord(sessionId, data.totalInicial, finalTime);
+                sessionRef.update({ reportSent: true });
+            }
+        } else {
+            document.getElementById('display').classList.remove('finished');
+            document.getElementById('btn-complete').disabled = false;
+            if (data.startAt) { if (!timerInterval) startTimer(data.startAt); } else { stopTimer(); }
+        }
+
+        const logHtml = (data.history || []).map(h => `
+            <div class="log-entry">
+                <span class="log-action ${h.action.toLowerCase()}">${h.action.toUpperCase()}: ${h.val || ''}</span>
+                <span class="log-time">${h.time}</span>
+            </div>
+        `).join('');
+        const logDiv = document.getElementById('log-list');
+        logDiv.innerHTML = logHtml;
+        logDiv.scrollTop = logDiv.scrollHeight;
+    });
+
+    function formatTime(ms) {
+        if (ms < 0) ms = 0;
+        const s = Math.floor(ms / 1000);
+        const h = Math.floor(s / 3600).toString().padStart(2, '0');
+        const m = Math.floor((s % 3600) / 60).toString().padStart(2, '0');
+        const sec = (s % 60).toString().padStart(2, '0');
+        return `${h}:${m}:${sec}`;
+    }
+
+    function startTimer(start) {
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            const diff = Date.now() - start;
+            document.getElementById('display').innerText = formatTime(diff);
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        document.getElementById('display').innerText = "00:00:00";
+    }
+
+    document.getElementById('btn-set').onclick = () => {
+        const total = parseInt(document.getElementById('input-total').value);
+        if (total > 0) {
+            sessionRef.set({ pendientes: total, completados: 0, startAt: null, finishAt: null, totalInicial: total, locked: true, history: [{action: "set", val: total, time: new Date().toLocaleTimeString()}], reportSent: false });
+        }
+    };
+
+    function completeTask() {
+        sessionRef.once('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.pendientes > 0) {
+                if (!data.startAt) data.startAt = Date.now();
+                data.pendientes--;
+                data.completados++;
+                if (!data.history) data.history = [];
+                data.history.push({ action: "complete", val: data.completados, time: new Date().toLocaleTimeString() });
+                if (data.pendientes === 0) data.finishAt = Date.now();
+                sessionRef.set(data);
+            }
+        });
+    }
+
+    function undo() {
+        sessionRef.once('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.completados > 0) {
+                data.pendientes++;
+                data.completados--;
+                data.finishAt = null;
+                data.reportSent = false;
+                data.history.push({ action: "undo", val: "", time: new Date().toLocaleTimeString() });
+                if (data.completados === 0) data.startAt = null;
+                sessionRef.set(data);
+            }
+        });
+    }
+
+    document.getElementById('btn-reset').onclick = () => {
+        if (prompt(`Type "${sessionId}" to reset:`) === sessionId) {
+            sessionRef.set({ pendientes: 0, completados: 0, startAt: null, finishAt: null, locked: false, history: [], reportSent: false });
+        }
+    };
+
+    document.getElementById('btn-complete').onclick = completeTask;
+    document.getElementById('btn-undo').onclick = undo;
+    document.addEventListener('keydown', (e) => {
+        if(e.key.toLowerCase()==='g') completeTask();
+        if(e.key.toLowerCase()==='z') undo();
+    });
+</script>
+</body>
+</html>
