@@ -10,7 +10,6 @@
         body { 
             font-family: 'Arial Black', sans-serif; text-align: center; 
             background-color: #0d0d0d;
-            /* 👇 TU ENLACE DE IMGUR APLICADO CON UN TINTE OSCURO PARA RESALTAR TEXTO 👇 */
             background-image: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.9)), url('https://i.imgur.com/eIpduCf.png'); 
             background-size: cover; background-position: center; background-attachment: fixed;
             color: white; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-transform: uppercase; box-sizing: border-box; 
@@ -85,8 +84,7 @@
         } else { clearInterval(timerInterval); timerInterval = null; if (data.finishAt) document.getElementById('display').innerText = formatTime(data.finishAt - data.startAt); }
 
         const logHtml = (data.history || []).map(h => {
-            let deltaHtml = h.delta ? `<span style="color:${h.delta.startsWith('-') ? '#4caf50' : '#f44336'}">(${h.delta})</span>` : "";
-            return `<div class="log-entry"><span>${h.action.toUpperCase()} ${h.val || ''} <span style="color:#00d4ff;">${h.lap || ''}</span></span><span>${deltaHtml} <span style="color:#555;">TOT: ${h.split}</span></span></div>`;
+            return `<div class="log-entry"><span>${h.action.toUpperCase()} ${h.val || ''} <span style="color:#00d4ff;">${h.lap || ''}</span></span><span><span style="color:#555;">TOT: ${h.split}</span></span></div>`;
         }).join('');
         document.getElementById('log-list').innerHTML = logHtml;
         document.getElementById('log-list').scrollTop = document.getElementById('log-list').scrollHeight;
@@ -109,14 +107,8 @@
             const compLogs = history.filter(l => l.action === 'complete');
             const lastTotalMs = compLogs.length > 0 ? parseTimeToMs(compLogs[compLogs.length - 1].split) : 0;
             const currentLapMs = totalElapsedMs - lastTotalMs;
-            let deltaStr = "";
-            if (data.completados >= 3) {
-                const prevLapMs = parseTimeToMs(compLogs[compLogs.length - 1].split) - (compLogs[compLogs.length - 2] ? parseTimeToMs(compLogs[compLogs.length - 2].split) : 0);
-                const diff = Math.round((currentLapMs - prevLapMs) / 1000);
-                deltaStr = diff <= 0 ? `${diff}s` : `+${diff}s`;
-            }
             if (!data.history) data.history = [];
-            data.history.push({ action: "complete", val: data.completados, split: formatTime(totalElapsedMs), lap: formatTime(currentLapMs), delta: deltaStr });
+            data.history.push({ action: "complete", val: data.completados, split: formatTime(totalElapsedMs), lap: formatTime(currentLapMs) });
             if (data.pendientes === 0) data.finishAt = now;
             sessionRef.set(data);
         });
