@@ -6,7 +6,7 @@
     <title>COLIVARESVRD | PERFORMANCE PRO</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-    <style> 
+    <style>
         body { 
             font-family: 'Arial Black', sans-serif; text-align: center; 
             background-color: #0d0d0d;
@@ -95,6 +95,43 @@
         if (total > 0) sessionRef.set({ pendientes: total, completados: 0, startAt: Date.now(), avgMs: 0, locked: true, history: [{action: "set", val: total, split: "00:00:00"}] });
     };
 
+    function sendReportToDiscord(data) {
+        const webhookUrl = "TU_WEBHOOK_DE_DISCORD_AQUÍ"; // REEMPLAZAR AQUÍ
+        if (!webhookUrl || webhookUrl.includes("AQUÍ")) return;
+
+        const totalTimeMs = data.finishAt - data.startAt;
+        const totalTimeStr = formatTime(totalTimeMs);
+        const avgTimeStr = formatTime(data.avgMs);
+
+        const embedData = {
+            username: "COLIVARESVRD Telemetry",
+            avatar_url: "https://i.imgur.com/eIpduCf.png", // Usando tu imagen de fondo como avatar
+            embeds: [{
+                title: `📊 REPORTE DE TELEMETRÍA - SALA: ${sessionId.toUpperCase()}`,
+                color: 16711892, // Magenta (#ff00d4 en decimal)
+                description: "**Misión Completada con Éxito.**",
+                fields: [
+                    { name: "⏱️ Tiempo Total", value: `\`${totalTimeStr}\``, inline: true },
+                    { name: "📉 Promedio por Artículo", value: `\`${avgTimeStr}\``, inline: true },
+                    { name: "📦 Cantidad Total", value: `\`${data.completados}\` artículos`, inline: false }
+                ],
+                footer: {
+                    text: "COLIVARESVRD PERFORMANCE SYSTEM",
+                    icon_url: "https://i.imgur.com/eIpduCf.png"
+                },
+                timestamp: new Date().toISOString()
+            }]
+        };
+
+        fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(embedData)
+        }).then(response => {
+            if (!response.ok) console.error("Error al enviar a Discord:", response.statusText);
+        });
+    }
+
     function completeTask() {
         sessionRef.once('value', (snapshot) => {
             const data = snapshot.val();
@@ -109,7 +146,12 @@
             const currentLapMs = totalElapsedMs - lastTotalMs;
             if (!data.history) data.history = [];
             data.history.push({ action: "completar", val: data.completados, split: formatTime(totalElapsedMs), lap: formatTime(currentLapMs) });
-            if (data.pendientes === 0) data.finishAt = now;
+            
+            if (data.pendientes === 0) {
+                data.finishAt = now;
+                // Enviar reporte completo a Discord
+                sendReportToDiscord(data);
+            }
             sessionRef.set(data);
         });
     }
