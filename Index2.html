@@ -95,6 +95,43 @@
         if (total > 0) sessionRef.set({ pendientes: total, completados: 0, startAt: Date.now(), avgMs: 0, locked: true, history: [{action: "set", val: total, split: "00:00:00"}] });
     };
 
+    function sendReportToDiscord(data) {
+        const webhookUrl = "TU_WEBHOOK_DE_DISCORD_AQUÍ"; // REEMPLAZAR AQUÍ
+        if (!webhookUrl || webhookUrl.includes("AQUÍ")) return;
+
+        const totalTimeMs = data.finishAt - data.startAt;
+        const totalTimeStr = formatTime(totalTimeMs);
+        const avgTimeStr = formatTime(data.avgMs);
+
+        const embedData = {
+            username: "COLIVARESVRD Telemetry",
+            avatar_url: "https://i.imgur.com/eIpduCf.png",
+            embeds: [{
+                title: `📊 TELEMETRY REPORT - SESSION: ${sessionId.toUpperCase()}`,
+                color: 16711892,
+                description: "**Mission Completed Successfully.**",
+                fields: [
+                    { name: "⏱️ Total Time", value: `\`${totalTimeStr}\``, inline: true },
+                    { name: "📉 Average Pace", value: `\`${avgTimeStr}\``, inline: true },
+                    { name: "📦 Total Quantity", value: `\`${data.completados}\` items`, inline: false }
+                ],
+                footer: {
+                    text: "COLIVARESVRD PERFORMANCE SYSTEM",
+                    icon_url: "https://i.imgur.com/eIpduCf.png"
+                },
+                timestamp: new Date().toISOString()
+            }]
+        };
+
+        fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(embedData)
+        }).then(response => {
+            if (!response.ok) console.error("Discord Error:", response.statusText);
+        });
+    }
+
     function completeTask() {
         sessionRef.once('value', (snapshot) => {
             const data = snapshot.val();
@@ -109,7 +146,11 @@
             const currentLapMs = totalElapsedMs - lastTotalMs;
             if (!data.history) data.history = [];
             data.history.push({ action: "complete", val: data.completados, split: formatTime(totalElapsedMs), lap: formatTime(currentLapMs) });
-            if (data.pendientes === 0) data.finishAt = now;
+            
+            if (data.pendientes === 0) {
+                data.finishAt = now;
+                sendReportToDiscord(data);
+            }
             sessionRef.set(data);
         });
     }
