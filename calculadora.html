@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COLIVARESVRD | CALCULADOR DE COLECCIÓN</title>
+    <style>
+        body { font-family: 'Arial Black', sans-serif; background: #0d0d0d; color: white; margin: 0; padding: 20px; text-transform: uppercase; }
+        .container { max-width: 600px; margin: auto; background: rgba(20, 20, 20, 0.95); padding: 20px; border-radius: 5px; border: 1px solid #333; box-shadow: 0 0 20px rgba(0, 212, 255, 0.2); }
+        .header { color: #00d4ff; font-size: 1.5rem; text-shadow: 2px 2px 0px #ff00d4; margin-bottom: 20px; border-bottom: 2px solid #ff00d4; padding-bottom: 10px; }
+        
+        .total-box { background: #1a1a1a; padding: 20px; border: 2px solid #00d4ff; margin-bottom: 20px; position: sticky; top: 10px; z-index: 100; }
+        .total-label { font-size: 0.8rem; color: #888; }
+        .total-count { font-size: 3rem; color: #4caf50; display: block; }
+
+        .garage-list { display: flex; flex-direction: column; gap: 10px; text-align: left; }
+        .garage-item { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-left: 4px solid #555; transition: 0.2s; cursor: pointer; }
+        .garage-item:hover { background: rgba(255,255,255,0.1); }
+        .garage-item.active { border-left-color: #00d4ff; background: rgba(0, 212, 255, 0.1); }
+        
+        input[type="checkbox"] { width: 25px; height: 25px; cursor: pointer; margin-right: 15px; accent-color: #00d4ff; }
+        .garage-info { flex-grow: 1; }
+        .garage-name { font-size: 0.9rem; display: block; }
+        .garage-cap { font-size: 0.7rem; color: #00d4ff; }
+
+        .btn-reset { margin-top: 20px; background: #d32f2f; color: white; border: none; padding: 10px; width: 100%; font-family: 'Arial Black'; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">GARAGE INVENTORY TRACKER</div>
+
+    <div class="total-box">
+        <span class="total-label">VEHÍCULOS TOTALES EN COLECCIÓN</span>
+        <span class="total-count" id="total-display">0</span>
+    </div>
+
+    <div class="garage-list" id="list">
+        </div>
+
+    <button class="btn-reset" onclick="resetAll()">LIMPIAR TODO</button>
+</div>
+
+<script>
+    const garages = [
+        { name: "Eclipse Blvd Garage (5 Floors)", cap: 50 },
+        { name: "CEO Office Garages (3 Floors)", cap: 60 },
+        { name: "Nightclub Storage (B2, B3, B4)", cap: 30 },
+        { name: "Nightclub Entrance", cap: 1 },
+        { name: "Agency Garage", cap: 20 },
+        { name: "Arena War Workshop (B1, B2)", cap: 30 },
+        { name: "Casino Penthouse Garage", cap: 10 },
+        { name: "Arcade Garage", cap: 10 },
+        { name: "Auto Shop", cap: 10 },
+        { name: "Facility (Instalación)", cap: 7 },
+        { name: "Bail Office (Oficina Fianzas)", cap: 2 },
+        { name: "Salvage Yard (Desguace)", cap: 2 },
+        { name: "MOC (C.O.M) Personal Space", cap: 1 },
+        { name: "Avenger Vehicle Workshop", cap: 1 },
+        { name: "Kosatka (Toreador/Stromberg)", cap: 1 },
+        { name: "Apartamentos / Casas (10 slots)", cap: 10 },
+        { name: "Apartamentos / Casas (10 slots)", cap: 10 },
+        { name: "Apartamentos / Casas (10 slots)", cap: 10 },
+        { name: "Garajes Independientes (10 slots)", cap: 10 },
+        { name: "Motorcycle Club (Motos)", cap: 10 }
+    ];
+
+    const listDiv = document.getElementById('list');
+    const totalDisplay = document.getElementById('total-display');
+
+    function render() {
+        listDiv.innerHTML = '';
+        garages.forEach((g, index) => {
+            const item = document.createElement('div');
+            item.className = 'garage-item';
+            item.innerHTML = `
+                <input type="checkbox" id="g-${index}" onchange="calculate()">
+                <div class="garage-info">
+                    <span class="garage-name">${g.name}</span>
+                    <span class="garage-cap">${g.cap} VEHÍCULOS</span>
+                </div>
+            `;
+            item.onclick = (e) => {
+                if(e.target.type !== 'checkbox') {
+                    const cb = item.querySelector('input');
+                    cb.checked = !cb.checked;
+                    calculate();
+                }
+            };
+            listDiv.appendChild(item);
+        });
+    }
+
+    function calculate() {
+        let total = 0;
+        const checks = document.querySelectorAll('input[type="checkbox"]');
+        checks.forEach((cb, index) => {
+            const parent = cb.parentElement;
+            if(cb.checked) {
+                total += garages[index].cap;
+                parent.classList.add('active');
+            } else {
+                parent.classList.remove('active');
+            }
+        });
+        totalDisplay.innerText = total;
+    }
+
+    function resetAll() {
+        const checks = document.querySelectorAll('input[type="checkbox"]');
+        checks.forEach(cb => cb.checked = false);
+        calculate();
+    }
+
+    render();
+</script>
+</body>
+</html>
